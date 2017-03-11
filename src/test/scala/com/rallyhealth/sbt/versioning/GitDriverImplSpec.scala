@@ -25,7 +25,7 @@ class GitDriverImplSpec extends FunSpec {
     it("commitCount") {
       // did it do something? I don't care what it did really, as long as it didn't throw
       val driver = new GitDriverImpl(workingDir)
-      assert(driver.getCommitCount(None) > 10)
+      assert(driver.getCommitCount(None) > 1)
     }
 
     it("branchState") {
@@ -43,7 +43,7 @@ class GitDriverImplSpec extends FunSpec {
 
     it("no limit (count to head)") {
       val commitCount = driver.getCommitCount(None)
-      assert(commitCount > 10) // did it do something? I don't care what it did really
+      assert(commitCount > 1) // did it do something? I don't care what it did really
     }
 
     it("limit (count back 3)") {
