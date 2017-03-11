@@ -1,0 +1,38 @@
+############################################################################################################
+# Tests for odd behavior for RallyVersioningPlugin. Not necessarily wrong, but definitely less obvious
+# to those who are not intimately familiar with all the dark magic in RallyVersioningPlugin.
+
+# I've tried to call out the "odd" behavior with triple bang "!!!"
+
+# Init the repo
+$ exec git init
+
+# No HEAD, first commit.
+$ exec git add .
+$ exec git commit -am 'First commit'
+$ exec git tag v1.0.0
+> reload
+> assertVersion 1.0.0
+
+# HEAD is tagged, add file, NO RELOAD
+$ touch file2.txt
+$ exec git add .
+# !!! If you don't reload you get the same 'clean' version even if the working directory is actually dirty.
+# !!! This isn't a check we added, it's because 'version' is a SettingKey, and SettingKeys do not automatically change
+# !!! their values after initialization.
+> assertVersion 1.0.0
+> reload
+> assertVersion 1.0.0-dirty-SNAPSHOT
+
+# HEAD is not tagged, second commit.
+$ exec git commit -am 'Second commit.'
+> reload
+> assertVersion 1.0.1-1-<hash>-SNAPSHOT
+
+# HEAD is not tagged, add file, NO RELOAD.
+$ touch file3.txt
+$ exec git add .
+# !!! Again, if you don't reload you get the same 'clean' version even if the working directory is actually dirty.
+> assertVersion 1.0.1-1-<hash>-SNAPSHOT
+> reload
+> assertVersion 1.0.1-1-<hash>-dirty-SNAPSHOT
