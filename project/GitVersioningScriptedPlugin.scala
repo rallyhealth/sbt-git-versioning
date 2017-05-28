@@ -152,7 +152,7 @@ object GitVersioningScriptedPlugin extends Plugin {
   * task into a file that the `scripted` SBT process can read.
   *
   * Capturing the STDOUT and STDERR is relatively straightforward, but how do I tell the `scripted` SBT where that
-  * file is? The `scripted` SBT is not run in the directory its defined in. A new temporary directory is created
+  * file is? The `scripted` SBT is not run in the directory it's defined in. A new temporary directory is created
   * and the contents of the `scripted` test are copied to the new directory by `sbt.test.ScriptedTests` using
   * [[Resources.readWriteResourceDirectory()]]. So before that copy occurs we create a file in the `scripted` test
   * directory that contains the full path of the file we buffered the STDOUT and STDERR into.
@@ -203,7 +203,7 @@ object ScriptedPluginCustomizations {
     def cleanUp(): Unit = {
       sideChannelFiles.foreach(file => if (file.exists) Try(file.delete()))
       Try(bufferedFileStream.close())
-      // NOTE: we don't delete the log because its useful for debugging
+      // NOTE: we don't delete the log because it's useful for debugging
     }
   }
 

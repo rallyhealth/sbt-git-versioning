@@ -1,5 +1,5 @@
-**git-versioning-sbt-plugin** is a suite of sbt plugin designed to make maintaining a simple, consistent, accurate
- [semantic versioning](http://semver.org/spec/v2.0.0.html) scheme across all Rally's scala code.
+**git-versioning-sbt-plugin** is an sbt plugin designed to make maintaining a simple, consistent, and accurate
+ [semantic versioning](http://semver.org/spec/v2.0.0.html) scheme with as little manual labor as possible.
 
 There are two sbt plugins in this one plugin library:
 * [GitVersioningPlugin](blob/master/src/main/scala/com/rallyhealth/sbt/versioning/GitVersioningPlugin.scala)
@@ -42,7 +42,9 @@ previous tags) and the state of the working directly. Read on for the exact deta
 ## Usage
 
 This plugin will automatically determine and set the `version` setting on startup. There is nothing developers need to
-explicitly do. You can `publishLocal` and PRs and use the created snapshot artifacts anywhere you would a release artifact.
+explicitly do. You can use `sbt publishLocal` to create a local snapshot artifact or, if you have a snapshot repository,
+you can `sbt publish` at the end of a continuous integration pipeline that is triggered on pull requests, so that you
+can easily pull one snapshot into another for testing.
 
 You will see additional log statements like:
 ```
@@ -134,7 +136,7 @@ $ sbt
 ### Notes
 
 * The patch version is incremented if there are commits, dirty or not. But it is not incremented if there are no
-commits. (I'm not clear on why this is, its legacy behavior.)
+commits.
 * The hash does **not** have a 'g' prefix like the output of `git describe`
 * A build will be flagged as not clean (and will have a `-dirty-SNAPSHOT` identifier applied) if
 `git status --porcelain` returns a non-empty result.
@@ -231,7 +233,7 @@ This is best explained with an example. Let's assume the latest tag is `1.2.3`:
 * `semVerVersionLimit := 1.**999.999**` - you will be allowed to make *minor or patch* changes.
 * `semVerVersionLimit := ""` - you will be allowed to make *major, minor, or patch* changes (`semVerVersionLimit` is disabled)
 
-Here's are a few stories to illustrate how `semVerVersionLimit` works.
+Here are a few stories to illustrate how `semVerVersionLimit` works.
 
 #### Patch Change
 
@@ -247,7 +249,7 @@ Here's are a few stories to illustrate how `semVerVersionLimit` works.
 2. Applejack wants to add a new method (minor change).
 3. Applejack adds the new method, commits, PRs, and merges.
 4. Applejack runs the release job for `1.2.4` but the release job fails.
-5. SemVerPlugin's errors in the logs say she that she needs to make a `minor` release (e.g. `1.3.0`).
+5. SemVerPlugin's errors in the logs say that she needs to make a `minor` release (e.g. `1.3.0`).
 6. Applejack successfully runs the release job for `1.3.0`.
 
 #### A 'Big' Patch Change

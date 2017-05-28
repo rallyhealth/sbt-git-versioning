@@ -1,6 +1,6 @@
 import sbt.complete.DefaultParsers._
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 
 organization := "com.rallyhealth.test.scripted"
 
@@ -8,9 +8,10 @@ scalacOptions ++= Seq("-Xfatal-warnings", "-Xlint")
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
-resolvers += "Artifactory Libs Releases" at "https://artifacts.werally.in/artifactory/libs-release"
+// resolvers += "Artifactory Libs Releases" at "https://artifacts.werally.in/artifactory/libs-release"
+resolvers += Resolver.bintrayRepo("rallyhealth", "sbt-plugins")
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
 publish := {}
 
