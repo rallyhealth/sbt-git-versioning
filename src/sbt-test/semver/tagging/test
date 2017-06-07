@@ -1,0 +1,89 @@
+###########################################################################################################
+# Uses "tag then publish" workflow.
+###########################################################################################################
+
+# Set up a git repo appease RallyVersioningPlugin and tag first version.
+$ exec git init
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+$ exec git tag v0.0.1
+
+# Should pass because there's no previous version
+> semVerCheck
+
+# Publish the first version so that SemVer will have a baseline to compare to.
+> publishLocal
+
+# Introduce minor change.
+$ copy-file srcTemplates/minorChange/Thing.scala src/main/scala/Thing.scala
+$ exec git add .
+$ exec git commit -am 'Minor change'
+
+# Reload to pick up new version change: 0.0.2-1-hash-SNAPSHOT
+> reload
+
+# Running semver against the minor addition should pass since IT'S A SNAPSHOT and BELOW THE LIMIT
+> semVerCheck
+
+# And all tasks should pass with semVerCheck.
+> compile
+> test
+> publishLocal
+
+# Release the minor version.
+$ exec git tag v0.1.0
+# Version change. Reload.
+> reload
+
+# Still good.
+> semVerCheck
+> publishLocal
+
+# Introduce major change.
+$ copy-file srcTemplates/majorChange/Thing.scala src/main/scala/Thing.scala
+$ exec git add .
+$ exec git commit -am 'Major change'
+
+# SemVer should fail given because it EXCEEDS THE LIMIT and/or DOES NOT HAVE A TAG
+-> semVerCheck
+
+# Release major version
+$ exec git tag v1.0.0
+> reload
+
+# Version now exceeds the semVerVersionLimit of 0.999.0
+-> semVerCheck
+
+# Version now exceeds the semVerVersionLimit of 0.999.0
+> 'set semVerVersionLimit := "1.0.0"'
+
+# All good now.
+> semVerCheck
+
+# Alternate time line of the above steps where you update the limit first
+$ exec git tag -d v1.0.0
+> reload
+
+# Version now exceeds the semVerVersionLimit of 0.999.0
+> 'set semVerVersionLimit := "1.0.0"'
+
+# Version is within the semVerVersionLimit of 1.0.0
+> semVerCheck
+
+# Release major version
+$ exec git tag v1.0.0
+
+# Compares v0.1.0 and v1.0.0 since there are no changes beyond v1.0.0 and working state is clean
+> semVerCheck
+
+# Another time line where we attempt to publish the major committed change as a minor version.
+$ exec git tag -d v1.0.0
+$ exec git tag v0.1.1
+> reload
+
+# The semVerVersionLimit has no issue with publishing a major change at a minor version
+> 'set semVerVersionLimit := "1.0.0"'
+
+# We should NOT be allowed to publish v0.1.1 with breaking changes
+-> publishLocal
+

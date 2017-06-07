@@ -1,0 +1,283 @@
+package com.rallyhealth.sbt.versioning
+
+import java.io.File
+
+import com.rallyhealth.sbt.versioning.GitFetcher.FetchResult
+import sbt.Keys._
+import sbt._
+import sbt.complete.DefaultParsers._
+import sbt.plugins.JvmPlugin
+
+import scala.concurrent.duration._
+
+/**
+  * Enforces Semantic Version plus support for identifying "x.y.z-SNAPSHOT" and "x.y.z-dirty-SNAPSHOT" builds.
+  */
+object GitVersioningPlugin extends AutoPlugin {
+
+  override def trigger: PluginTrigger = allRequirements
+
+  /**
+    * We hook test & publish which can only happen after the Defaults are set by the JvmPlugin.
+    * Otherwise, our hooks will get overridden.
+    *
+    * See [[http://stackoverflow.com/a/25251194]]
+    */
+  override def requires: Plugins = JvmPlugin
+
+  object autoImport {
+
+    lazy val autoFetch: SettingKey[Boolean] = settingKey[Boolean](
+      "`autoFetch` indicates whether to auto-fetch tags from remotes")
+
+    lazy val autoFetchResult: SettingKey[Seq[FetchResult]] = settingKey[Seq[FetchResult]](
+      "`autoFetchResult` is the result of the auto-fetch")
+
+    lazy val autoFetchRemotes: SettingKey[Seq[String]] = settingKey[Seq[String]](
+      "`autoFetchTags` are the names of git remotes to fetch tags from with `autoFetch` is true")
+
+    lazy val autoFetchTimeout: SettingKey[Int] = settingKey[Int](
+      "`autoFetchTimeout` is the timeout for git auto-fetching (in seconds)")
+
+    /** Note this can be overriden by [[ignoreDirty]]. */
+    lazy val isCleanRelease: SettingKey[Boolean] = settingKey[Boolean](
+      "`isCleanRelease` is whether the 'version' is a clean release or not (NOT based on the working dir)")
+
+    /** See [[GitDriver.calcCurrentVersion()]] */
+    lazy val versionFromGit: SettingKey[SemanticVersion] = settingKey[SemanticVersion](
+      "`versionFromGit` is The version as determined by git history")
+
+    /**
+      * The sbt ecosystem relies on the value of the version setting key as the
+      * source of truth for the version we're currently building.
+      *
+      * RallyVersioning is based on git tags which are often incremented to later versions after CI builds complete.
+      *
+      * For example, given a most recent tag of v1.5.0, [[GitVersioningPlugin]] at CI time
+      * will determine the version to be something like v1.5.1-4-aabcdef-SNAPSHOT.
+      *
+      * If we have checks (MiMa, SemVerPlugin, RallyShadingPlugin) that enforce that
+      * no major changes are introduced, without correctly versioning as v2.0.0, the build would fail.
+      *
+      * [[gitVersioningSnapshotLowerBound]] offers a way to nudge the candidate version
+      * up to v2.0.0-4-aabcdef-SNAPSHOT without tagging:
+      *
+      * {{{
+      *   rallyVersionSnapshotLowerBound := "2.0.0"
+      * }}}
+      *
+      * [[gitVersioningSnapshotLowerBound]] acts as a lower bound and has no effect
+      * when its value becomes less than [[versionFromGit]].
+      *
+      * [[gitVersioningSnapshotLowerBound]] has no effect when [[versionOverride]] is present.
+      */
+    lazy val gitVersioningSnapshotLowerBound: SettingKey[Option[ReleaseVersion]] = settingKey[Option[ReleaseVersion]](
+      "Produces snapshot versions whose major.minor.patch is at least this version."
+    )
+
+    /**
+      * This is used by our Jenkins scripts to set the version before creating and publishing a release. This must
+      * be a valid [[SemanticVersion]].
+      *
+      * The old `versionClassifier` was merged into this because it made the domain model excessively complicated --
+      * it was part of the version but carried around separately until some arbitrary point where it was merged into
+      * the version.
+      */
+    lazy val versionOverride: SettingKey[Option[String]] = settingKey[Option[String]](
+      "`versionOverride` overrides the automatically determined `version`. This is set (often by a system property)" +
+        " to the version you want to release before executing `publish` or `publishLocal`")
+
+    lazy val ignoreDirty: SettingKey[Boolean] = settingKey[Boolean](
+      "Forces clean builds, i.e. doesn't add '-dirty' to the version.")
+
+    lazy val printVersion: TaskKey[Unit] = taskKey[Unit](
+      "Prints the version that would be applied to this sbt project")
+
+    lazy val gitVersioningMaybeRelease: SettingKey[Option[SemVerReleaseType]] = settingKey[Option[SemVerReleaseType]](
+      "Specifies that the version from git should be incremented as a major, minor, or patch release."
+    )
+
+    lazy val writeVersion: InputKey[Unit] = inputKey[Unit]("""Writes the version to a file."""")
+  }
+
+  import autoImport._
+
+  // These Commands are necessary to prevent the taskKey from being run in EVERY project of multi-project builds.
+  lazy val printVersionCommand: Command = Command.command("printVersion") { (state: State) =>
+    val e = Project.extract(state)
+    val (newState, _) = e.runTask(printVersion, state)
+    newState
+  }
+
+  lazy val writeVersionCommand: Command = Command.single("writeVersion") { (state: State, args: String) =>
+    val e = Project.extract(state)
+    val (newState, _) = e.runInputTask(writeVersion, args, state)
+    newState
+  }
+
+  lazy val gitDriver: SettingKey[GitDriver] = settingKey[GitDriver](
+    "Driver that allows executing common commands against a git working directory.")
+
+  override lazy val buildSettings: Seq[Setting[_]] = Seq(
+
+    // Note the expensive operation are scoped to "ThisBuild" so they are run once-per-project rather than
+    // once-per-module
+
+    autoFetch := {
+      Option(System.getProperty("version.autoFetch"))
+        .orElse(Option(System.getenv("VERSION_AUTOFETCH")))
+        .exists(_.toBoolean)
+    },
+
+    autoFetchRemotes := Seq("upstream", "origin"),
+
+    autoFetchTimeout := 15, // seconds
+
+    autoFetchResult := {
+      implicit val logger = ConsoleLogger()
+      if (autoFetch.value) {
+        logger.info("Fetching the most up-to-date tags from git remotes")
+        GitFetcher.fetchRemotes(autoFetchRemotes.value, autoFetchTimeout.value.seconds)
+      } else {
+        logger.info(
+          "Skipping fetching tags from git remotes; to enable, set the system property version.autoFetch=true")
+        Seq.empty[FetchResult]
+      }
+    },
+
+    gitDriver := new GitDriverImpl(baseDirectory.value),
+
+    versionFromGit := {
+      // This depends on but does not use [[autoFetchResult]]; that ensures the task is run but ignores the result.
+      (autoFetchResult in ThisProject).value
+      val gitVersion = gitDriver.value.calcCurrentVersion(ignoreDirty.value)
+
+      ConsoleLogger().info(s"RallyVersioningPlugin set versionFromGit=$gitVersion")
+
+      gitVersion
+    },
+
+    versionOverride := {
+      Option(System.getProperty("version.override")).map {
+        versionOverrideStr =>
+          val ver = ReleaseVersion.unapply(versionOverrideStr)
+            .filter(!_.isDirty)
+            .getOrElse {
+              val msg = s"cannot parse versionOverride=$versionOverrideStr as clean release version"
+              throw new IllegalArgumentException(msg)
+            }
+
+          ConsoleLogger().info(s"RallyVersioningPlugin set versionOverride=$versionOverrideStr")
+          ver.toString
+      }
+    },
+
+    gitVersioningMaybeRelease := sys.props.get("release").map(SemVerReleaseType.fromStringOrThrow),
+
+    gitVersioningSnapshotLowerBound := None,
+
+    ignoreDirty := false,
+
+    version := {
+      import SemVerReleaseType._
+
+      // version must be semver, see version's definition
+      val verOverride = versionOverride.value.map(
+        SemanticVersion.fromString(_)
+          .getOrElse(throw new IllegalArgumentException(s"cannot parse version=${versionOverride.value}"))
+      )
+
+      lazy val boundedVersionFromGit: SemanticVersion = {
+        // 1. Start with version from git.
+        // 2. Apply major/minor/patch release.
+        // 3. Apply snapshot lower bound.
+        type VersionTransform = SemanticVersion => SemanticVersion
+
+        val applyMajorMinorPatchRelease: VersionTransform = ver => gitVersioningMaybeRelease.value
+          .foldLeft(ver)(_.release(_))
+
+        val applySnapshotLowerBound: VersionTransform = ver => gitVersioningSnapshotLowerBound.value
+          .foldLeft(ver)(_.lowerBound(_, gitDriver.value.branchState))
+
+        val applyAllTransforms = applyMajorMinorPatchRelease andThen applySnapshotLowerBound
+        applyAllTransforms(versionFromGit.value)
+      }
+
+      val version = verOverride.getOrElse(boundedVersionFromGit).toString
+      ConsoleLogger().info(s"RallyVersioningPlugin set version=$version")
+      version
+    },
+
+    isCleanRelease := {
+      // version must be semver, see version's definition
+      val isDirty = SemanticVersion.fromString(version.value)
+        .getOrElse(throw new IllegalArgumentException(s"cannot parse version=${version.value}"))
+        .isDirty
+
+      ConsoleLogger().info(s"RallyVersioningPlugin set isCleanRelease=${!isDirty}")
+
+      !isDirty
+    },
+
+    printVersion := {
+      val log = streams.value.log
+      log.info(s"Version as determined by git history: ${versionFromGit.value}")
+      versionOverride.value.foreach { verOverride =>
+        log.info(s"Version as determined by system property (version.override): $verOverride")
+      }
+      log.success(s"Successfully determined version: ${versionOverride.value.getOrElse(versionFromGit.value)}")
+    },
+
+    writeVersion := {
+      val file = any.*.map(_.mkString).parsed
+      IO.write(new File(file), version.value.getBytes)
+    },
+
+    commands ++= Seq(printVersionCommand, writeVersionCommand)
+  )
+
+  implicit class BoundedSemanticVersion(val version: SemanticVersion) extends AnyVal {
+
+    /**
+      * A new [[SemanticVersion]] increased up to the provided lower bound or else the original [[version]].
+      *
+      * @param branchState Used to fill in the hash and commit count if this returns a new [[SemanticVersion]]
+      * @return A new [[SemanticVersion]] increased up to the provided lower bound, or else the original [[version]].
+      */
+    def lowerBound(bound: ReleaseVersion, branchState: GitBranchState): SemanticVersion = {
+      if (bound <= version) return version
+
+      version match {
+        case r: ReleaseVersion =>
+          // unfortunately BranchState makes this more complex -- we create SnapshotVersions if we have a
+          // GitCommitWithCount, and a ReleaseVersion if we have a GitCommit
+          branchState match {
+            case GitBranchStateTwoReleases(head, _, _, _) => fromCommit(bound, head)
+            case GitBranchStateOneReleaseNotHead(head, _, _) => fromCommit(bound, head)
+            case GitBranchStateOneReleaseHead(head, _) => fromCommit(bound, head)
+            case GitBranchStateNoReleases(head) => fromCommit(bound, head)
+            case GitBranchStateNoCommits => bound
+          }
+
+        case s: SnapshotVersion =>
+          s.copy(bound.major, bound.minor, bound.patch, bound.versionIdentifiers)
+      }
+    }
+
+    private def fromCommit(bound: ReleaseVersion, commit: GitCommit): ReleaseVersion = {
+      bound.copy(isDirty = version.isDirty)
+    }
+
+    private def fromCommit(bound: ReleaseVersion, commit: GitCommitWithCount): SemanticVersion = {
+      SnapshotVersion(
+        bound.major,
+        bound.minor,
+        bound.patch,
+        bound.versionIdentifiers,
+        version.isDirty,
+        HashSemVerIdentifier(commit.commit.abbreviatedHash),
+        CommitsSemVerIdentifier(commit.count))
+    }
+  }
+
+}

@@ -1,0 +1,23 @@
+############################################################################################################
+# Tests commands.
+
+# Init the repo
+$ exec git init
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+
+# Tag it -> clean Release
+$ exec git tag v1.0.0
+> reload
+
+############################################################################################################
+# printVersions
+
+# Test that it returns successfully and does not get removed again.
+> printVersion
+
+############################################################################################################
+# writeVersion
+
+> writeVersion version.txt
+> checkVersionFile

@@ -1,0 +1,44 @@
+# Set up a git repo appease RallyVersioningPlugin and tag first version.
+$ exec git init
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+$ exec git tag v1.0.0
+
+# Publish the first version so that SemVer will have a baseline to compare to.
+> publishLocal
+
+# Introduce breaking change to "disabled". It shouldn't care.
+$ exec git rm disabled/src/main/scala/Thing.scala
+$ exec git commit -am 'Breaking change to "disabled".'
+
+# Reload to have the new commit reflected in the version. Should be 1.0.1-1-hash-SNAPSHOT.
+> reload
+
+# SemVerCheck should pass here.
+# (Checking some tasks explicitly a) to exercise project-specific tasking and b) just to be sure.)
+> semVerCheck
+-> disabled/semVerCheck
+> enabled/semVerCheck
+> compile
+> disabled/compile
+> enabled/compile
+> publishLocal
+> disabled/publishLocal
+> enabled/publishLocal
+
+# Introduce breaking change to "enabled". This is a deal breaker.
+$ exec git rm enabled/src/main/scala/Thing.scala
+$ exec git commit -am 'Breaking change to "enabled".'
+> reload
+
+# SemVerCheck should fail here.
+# (Checking some tasks explicitly a) to exercise project-specific tasking and b) just to be sure.)
+-> semVerCheck
+-> disabled/semVerCheck
+-> enabled/semVerCheck
+-> compile
+> disabled/compile
+-> enabled/compile
+-> publishLocal
+> disabled/publishLocal
+-> enabled/publishLocal
