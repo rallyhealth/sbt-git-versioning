@@ -2,8 +2,12 @@
  [semantic versioning](http://semver.org/spec/v2.0.0.html) scheme with as little manual labor as possible.
 
 There are two sbt plugins in this one plugin library:
-* [GitVersioningPlugin](blob/master/src/main/scala/com/rallyhealth/sbt/versioning/GitVersioningPlugin.scala)
-* [SemVerPlugin](blob/master/src/main/scala/com/rallyhealth/sbt/semver/SemVerPlugin.scala)
+* [GitVersioningPlugin](src/main/scala/com/rallyhealth/sbt/versioning/GitVersioningPlugin.scala)
+* [SemVerPlugin](src/main/scala/com/rallyhealth/sbt/semver/SemVerPlugin.scala)
+
+# Compatibility
+
+Tested and supported for sbt version 0.13.x and above.
 
 # Install
 
@@ -35,7 +39,7 @@ val example = project
 
 # GitVersioningPlugin
 
-This [plugin](blob/master/src/main/scala/com/rallyhealth/sbt/versioning/GitVersioningPlugin.scala)
+This [plugin](src/main/scala/com/rallyhealth/sbt/versioning/GitVersioningPlugin.scala)
 focuses on automatically determining the value of the `version` setting. The `version` is determined by looking at git history (for
 previous tags) and the state of the working directly. Read on for the exact details.
 
@@ -176,7 +180,7 @@ removed because it was never used. Feel free to re-add it.)
 
 # SemVerPlugin
 
-This [plugin](blob/master/src/main/scala/com/rallyhealth/sbt/semver/SemVerPlugin.scala)
+This [plugin](src/main/scala/com/rallyhealth/sbt/semver/SemVerPlugin.scala)
 will halt the build (compile, publish, etc.) if your changes would not make a valid [semantic version](http://semver.org/spec/v2.0.0.html).
 The plugin checks the previous release, your changes, and the `semVerLimitRelease` to ensure your changes are really
 patch/minor/major changes if you want to release a patch/minor/major.

@@ -11,10 +11,8 @@ licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 bintrayOrganization := Some("rallyhealth")
 bintrayRepository := "sbt-plugins"
 
-//credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 publishMavenStyle := false
 
-//resolvers += "Artifactory Libs Releases" at "https://artifacts.werally.in/artifactory/libs-release"
 resolvers += Resolver.bintrayRepo("typesafe", "sbt-plugins")
 
 scalacOptions ++= Seq("-Xfatal-warnings", "-Xlint")

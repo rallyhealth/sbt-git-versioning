@@ -24,11 +24,10 @@ import scala.tools.nsc.util.{DirectoryClassPath, JavaClassPath}
   * print out the error to the console before the JVM shuts down!
   *
   * Google produced only [[https://github.com/typesafehub/migration-manager/issues/55]] which wasn't very helpful.
-  * Unfortunately I could not re-create this with a unit or scripted test either. I only replicated it in the wild
-  * with lib-carestats. If I ran "sbt compile" it would just halt SBT trying to compile the root project, specifically
-  * the "lib-carestats/target/scala-2.11/classes" path. That path doesn't exist because the root is not a real project.
-  * That path comes from [[MimaKeys.mimaCurrentClassfiles]]. I do not know why it contains a non-existent path if the
-  * failure is so harsh.
+  * Unfortunately I could not re-create this with a unit or scripted test either. I only replicated it in the wild.
+  * If I ran "sbt compile" it would just halt SBT trying to compile the root project. The path would not exist because
+  * the root is not a real project. That path comes from [[MimaKeys.mimaCurrentClassfiles]]. I do not know why it
+  * contains a non-existent path if the failure is so harsh.
   *
   * I copied the code from [[https://github.com/typesafehub/migration-manager/blob/master/reporter/src/main/scala/com/typesafe/tools/mima/lib/MiMaLib.scala]]
   * and modified it:
