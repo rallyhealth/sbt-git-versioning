@@ -11,7 +11,7 @@ sealed trait SemVerTargetVersion {
 }
 
 /**
-  * If the user sets [[SemVerPlugin.autoImport.semVerVersionLimit]] then the [[ReleaseVersion]] is a limit, an upper
+  * If the user sets [[SemVerPlugin.autoImport.semVerLimit]] then the [[ReleaseVersion]] is a limit, an upper
   * bound. It is cannot be used for some errors, like [[NotNormalizedSemVerDiff]].
   *
   * This class should ALWAYS have higher precedence than [[SemVerSpecificTargetVersion]].

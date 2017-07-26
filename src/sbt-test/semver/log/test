@@ -57,14 +57,14 @@ $ exec git tag v1.0.0 -m "Initial Tag"
 
 > reload
 > startTest sanity_update
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > update
 > searchLog not "UNRESOLVED DEPENDENCIES"
 > searchLog not "[SemVer]"
 
 > reload
 > startTest sanity_clean
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > clean
 > searchLog not "[SemVer]"
 
@@ -77,12 +77,12 @@ $ exec git tag v1.0.0 -m "Initial Tag"
 > reload
 
 > startTest sanity_compile_original
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertAborted
 
 > startTest sanity_test_original
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > test
 > assertAborted
 
@@ -90,12 +90,12 @@ $ exec git tag v1.0.0 -m "Initial Tag"
 > reload
 
 > startTest sanity_compile_patch
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertDisabled
 
 > startTest sanity_test_patch
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > test
 > assertDisabled
 
@@ -105,12 +105,12 @@ $ exec git tag v1.0.0 -m "Initial Tag"
 > reload
 
 > startTest config_invalid_limit_version
-> 'set semVerVersionLimit := "WHATEVER"'
+> 'set semVerLimit := "WHATEVER"'
 -> compile
 > assertConfigError
 
 > startTest config_dirty_limit_version
-> 'set semVerVersionLimit := "1.0.0-dirty-SNAPSHOT"'
+> 'set semVerLimit := "1.0.0-dirty-SNAPSHOT"'
 -> compile
 > assertConfigError
 
@@ -121,34 +121,34 @@ $ exec git tag v1.0.0 -m "Initial Tag"
 > reload
 
 > startTest config_compile_extreme_limit_major
-> 'set semVerVersionLimit := "999.999.999"'
+> 'set semVerLimit := "999.999.999"'
 > compile
 > assertAborted
 
 > startTest config_compile_extreme_limit_minor
-> 'set semVerVersionLimit := "1.999.999"'
+> 'set semVerLimit := "1.999.999"'
 > compile
 > assertPassed patch
 
 > startTest config_compile_extreme_limit_patch
-> 'set semVerVersionLimit := "1.0.999"'
+> 'set semVerLimit := "1.0.999"'
 > compile
 > assertPassed patch
 
 > startTest config_publish_extreme_limit_major
-> 'set semVerVersionLimit := "999.999.999"'
+> 'set semVerLimit := "999.999.999"'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
 
 > startTest config_publish_extreme_limit_minor
-> 'set semVerVersionLimit := "1.999.999"'
+> 'set semVerLimit := "1.999.999"'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
 
 > startTest config_publish_extreme_limit_patch
-> 'set semVerVersionLimit := "1.0.999"'
+> 'set semVerLimit := "1.0.999"'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
@@ -160,19 +160,19 @@ $ exec git tag v1.0.0 -m "Initial Tag"
 
 > reload
 > startTest disable_semver_check_compile
-> '; set semVerCheckOnCompile := false ; set semVerVersionLimit := ""'
+> '; set semVerCheckOnCompile := false ; set semVerLimit := ""'
 > compile
 > searchLog not "[SemVer]"
 
 > reload
 > startTest disable_semver_check_test
-> '; set semVerCheckOnTest := false ; set semVerVersionLimit := ""'
+> '; set semVerCheckOnTest := false ; set semVerLimit := ""'
 > test
 > searchLog not "[SemVer]"
 
 > reload
 > startTest disable_semver_check_publish
-> '; set semVerCheckOnPublish := false ; set semVerVersionLimit := ""'
+> '; set semVerCheckOnPublish := false ; set semVerLimit := ""'
 > publishLocal
 > searchLog not "[SemVer]"
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
@@ -184,27 +184,27 @@ $ exec git tag v1.0.0 -m "Initial Tag"
 > reload
 
 > startTest compile_dirty_patch_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertDisabled
 
 > startTest compile_dirty_patch_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_dirty_patch_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 > compile
 > assertPassed patch
 
 > startTest compile_dirty_patch_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 > compile
 > assertPassed patch
 
 > startTest compile_dirty_patch_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertAborted
 
@@ -216,27 +216,27 @@ $ exec git commit -am "Patch change"
 > reload
 
 > startTest compile_snapshot_patch_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertDisabled
 
 > startTest compile_snapshot_patch_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_snapshot_patch_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 > compile
 > assertPassed patch
 
 > startTest compile_snapshot_patch_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 > compile
 > assertPassed patch
 
 > startTest compile_snapshot_patch_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertAborted
 
@@ -247,27 +247,27 @@ $ exec git tag v1.0.1 -m "Patch tag"
 > reload
 
 > startTest compile_release_after_tag_patch_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertPassed patch
 
 > startTest compile_release_after_tag_patch_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_release_after_tag_patch_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 > compile
 > assertPassed patch
 
 > startTest compile_release_after_tag_patch_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 > compile
 > assertPassed patch
 
 > startTest compile_release_after_tag_patch_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertPassed patch
 
@@ -281,27 +281,27 @@ $ exec git reset --hard HEAD~1
 > reload
 
 > startTest compile_dirty_minor_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertDisabled
 
 > startTest compile_dirty_minor_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_dirty_minor_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 -> compile
 > assertFailed minor
 
 > startTest compile_dirty_minor_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 > compile
 > assertPassed minor
 
 > startTest compile_dirty_minor_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertAborted
 
@@ -313,27 +313,27 @@ $ exec git commit -am "Minor change"
 > reload
 
 > startTest compile_snapshot_minor_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertDisabled
 
 > startTest compile_snapshot_minor_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_snapshot_minor_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 -> compile
 > assertFailed minor
 
 > startTest compile_snapshot_minor_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 > compile
 > assertPassed minor
 
 > startTest compile_snapshot_minor_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertAborted
 
@@ -344,27 +344,27 @@ $ exec git tag v1.1.0 -m "Minor tag"
 > reload
 
 > startTest compile_release_after_tag_minor_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertPassed minor
 
 > startTest compile_release_after_tag_minor_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_release_after_tag_minor_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 -> compile
 > assertConfigError
 
 > startTest compile_release_after_tag_minor_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 > compile
 > assertPassed minor
 
 > startTest compile_release_after_tag_minor_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertPassed minor
 
@@ -378,27 +378,27 @@ $ exec git reset --hard HEAD~1
 > reload
 
 > startTest compile_dirty_major_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertDisabled
 
 > startTest compile_dirty_major_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_dirty_major_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 -> compile
 > assertFailed major
 
 > startTest compile_dirty_major_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 -> compile
 > assertFailed major
 
 > startTest compile_dirty_major_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertAborted
 
@@ -410,27 +410,27 @@ $ exec git commit -am "Major change"
 > reload
 
 > startTest compile_snapshot_major_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertDisabled
 
 > startTest compile_snapshot_major_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_snapshot_major_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 -> compile
 > assertFailed major
 
 > startTest compile_snapshot_major_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 -> compile
 > assertFailed major
 
 > startTest compile_snapshot_major_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertAborted
 
@@ -441,27 +441,27 @@ $ exec git tag v2.0.0 -m "Major tag"
 > reload
 
 > startTest compile_release_after_tag_major_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > compile
 > assertAborted
 
 > startTest compile_release_after_tag_major_equal_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_release_after_tag_major_under_limit_patch
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 -> compile
 > assertConfigError
 
 > startTest compile_release_after_tag_major_under_limit_minor
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 -> compile
 > assertConfigError
 
 > startTest compile_release_after_tag_major_under_limit_major
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > compile
 > assertAborted
 
@@ -475,19 +475,19 @@ $ exec git reset --hard HEAD~1
 > reload
 
 > startTest publish_dirty_patch_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertDisabled
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
 
 > startTest publish_dirty_patch_good_limit
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
 
 > startTest publish_dirty_patch_bad_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> publishLocal
 > assertConfigError
 
@@ -498,21 +498,21 @@ $ exec git commit -am "Patch commit"
 
 > reload
 > startTest publish_snapshot_patch_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertDisabled
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1-1-[0-9a-f]{7,}-SNAPSHOT/"""
 
 > reload
 > startTest publish_snapshot_patch_good_limit
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1-1-[0-9a-f]{7,}-SNAPSHOT/"""
 
 > reload
 > startTest publish_snapshot_patch_bad_limit
-> 'set semVerVersionLimit := "1.0.0"'
+> 'set semVerLimit := "1.0.0"'
 -> publishLocal
 > assertConfigError
 
@@ -521,46 +521,46 @@ $ exec git commit -am "Patch commit"
 
 > reload
 > startTest publish_release_before_tag_patch_no_limit_bad_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_before_tag_patch_no_limit_good_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1/"""
 
 > reload
 > startTest publish_release_before_tag_patch_good_limit_bad_override
-> '; set semVerVersionLimit := "1.0.1" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "1.0.1" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_before_tag_patch_bad_limit_good_override
-> ';set semVerVersionLimit := "1.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> ';set semVerLimit := "1.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_before_tag_patch_as_patch
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1/"""
 
 > reload
 > startTest publish_release_before_tag_patch_as_minor
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.1\\.0/"""
 
 > reload
 > startTest publish_release_before_tag_patch_as_major
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
@@ -572,53 +572,53 @@ $ exec git tag "v1.0.1" -m "Patch tag"
 
 > reload
 > startTest publish_release_after_patch_no_limit_bad_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_patch_no_limit_good_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1/"""
 
 > reload
 > startTest publish_release_after_patch_no_limit_no_override
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1/"""
 
 > reload
 > startTest publish_release_after_patch_good_limit_bad_override
-> '; set semVerVersionLimit := "1.0.1" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "1.0.1" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_patch_bad_limit_good_override
-> ';set semVerVersionLimit := "1.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> ';set semVerLimit := "1.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_patch_as_patch
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1/"""
 
 > reload
 > startTest publish_release_after_patch_as_minor
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed patch
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.1\\.0/"""
 
 > reload
 > startTest publish_release_after_patch_as_major
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
@@ -634,19 +634,19 @@ $ exec git reset --hard HEAD~1
 > reload
 
 > startTest publish_dirty_minor_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertDisabled
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
 
 > startTest publish_dirty_minor_good_limit
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 > publishLocal
 > assertPassed minor
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
 
 > startTest publish_dirty_minor_bad_limit
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 -> publishLocal
 > assertFailed minor
 
@@ -657,19 +657,19 @@ $ exec git commit -am "Minor commit"
 > reload
 
 > startTest publish_snapshot_minor_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertDisabled
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1-1-[0-9a-f]{7,}-SNAPSHOT/"""
 
 > startTest publish_snapshot_minor_good_limit
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 > publishLocal
 > assertPassed minor
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1-1-[0-9a-f]{7,}-SNAPSHOT/"""
 
 > startTest publish_snapshot_minor_bad_limit
-> 'set semVerVersionLimit := "1.0.1"'
+> 'set semVerLimit := "1.0.1"'
 -> publishLocal
 > assertFailed minor
 
@@ -678,45 +678,45 @@ $ exec git commit -am "Minor commit"
 
 > reload
 > startTest publish_release_before_tag_minor_no_limit_bad_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed minor
 
 > reload
 > startTest publish_release_before_tag_minor_no_limit_good_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed minor
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.1\\.0/"""
 
 > reload
 > startTest publish_release_before_tag_minor_good_limit_bad_override
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed minor
 
 > reload
 > startTest publish_release_before_tag_minor_bad_limit_good_override
-> '; set semVerVersionLimit := "1.0.1" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "1.0.1" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_before_tag_minor_as_patch
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed minor
 
 > reload
 > startTest publish_release_before_tag_minor_as_minor
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed minor
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.1\\.0/"""
 
 > reload
 > startTest publish_release_before_tag_minor_as_major
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
@@ -728,52 +728,52 @@ $ exec git tag "v1.1.0" -m "Minor tag"
 
 > reload
 > startTest publish_release_after_minor_no_limit_bad_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_minor_no_limit_good_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed minor
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.1\\.0/"""
 
 > reload
 > startTest publish_release_after_minor_no_limit_no_override
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertPassed minor
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.1\\.0/"""
 
 > reload
 > startTest publish_release_after_minor_good_limit_bad_override
-> '; set semVerVersionLimit := "1.0.1" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "1.0.1" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_minor_bad_limit_good_override
-> ';set semVerVersionLimit := "1.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> ';set semVerLimit := "1.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_minor_as_patch
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_minor_as_minor
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertPassed minor
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.1\\.0/"""
 
 > reload
 > startTest publish_release_after_minor_as_major
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
@@ -789,19 +789,19 @@ $ exec git reset --hard HEAD~1
 > reload
 
 > startTest publish_dirty_major_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertDisabled
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
 
 > startTest publish_dirty_major_good_limit
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
 
 > startTest publish_dirty_major_bad_limit
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 -> publishLocal
 > assertFailed major
 
@@ -812,19 +812,19 @@ $ exec git commit -am "Major commit"
 > reload
 
 > startTest publish_snapshot_major_no_limit
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertDisabled
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1-1-[0-9a-f]{7,}-SNAPSHOT/"""
 
 > startTest publish_snapshot_major_good_limit
-> 'set semVerVersionLimit := "2.0.0"'
+> 'set semVerLimit := "2.0.0"'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/1\\.0\\.1-1-[0-9a-f]{7,}-SNAPSHOT/"""
 
 > startTest publish_snapshot_major_bad_limit
-> 'set semVerVersionLimit := "1.1.0"'
+> 'set semVerLimit := "1.1.0"'
 -> publishLocal
 > assertFailed major
 
@@ -833,44 +833,44 @@ $ exec git commit -am "Major commit"
 
 > reload
 > startTest publish_release_before_tag_major_no_limit_bad_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed major
 
 > reload
 > startTest publish_release_before_tag_major_no_limit_good_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
 
 > reload
 > startTest publish_release_before_tag_major_good_limit_bad_override
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed major
 
 > reload
 > startTest publish_release_before_tag_major_bad_limit_good_override
-> ';set semVerVersionLimit := "1.1.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> ';set semVerLimit := "1.1.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_before_tag_major_as_patch
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed major
 
 > reload
 > startTest publish_release_before_tag_major_as_minor
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed major
 
 > reload
 > startTest publish_release_before_tag_major_as_major
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
@@ -882,51 +882,51 @@ $ exec git tag "v2.0.0" -m "Major tag"
 
 > reload
 > startTest publish_release_after_major_no_limit_bad_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_major_no_limit_good_override
-> '; set semVerVersionLimit := "" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
 
 > reload
 > startTest publish_release_after_major_no_limit_no_override
-> 'set semVerVersionLimit := ""'
+> 'set semVerLimit := ""'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
 
 > reload
 > startTest publish_release_after_major_good_limit_bad_override
-> '; set semVerVersionLimit := "1.0.1" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "1.0.1" ; set versionOverride := Some("1.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_major_bad_limit_good_override
-> ';set semVerVersionLimit := "1.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> ';set semVerLimit := "1.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_major_as_patch
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.0.1") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_major_as_minor
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("1.1.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertConfigError
 
 > reload
 > startTest publish_release_after_major_as_major
-> '; set semVerVersionLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "2.0.0" ; set versionOverride := Some("2.0.0") ; set version := versionOverride.value.get'
 > publishLocal
 > assertAborted
 > grepLog """published log_2\\.11 to .*?/com.rallyhealth.test.scripted/log_2\\.11/2\\.0\\.0/"""
@@ -943,19 +943,19 @@ $ exec git commit -a -m "Patch commit"
 
 > reload
 > startTest not_normalized_compile_patch_with_limit
-> '; set semVerVersionLimit := "2.0.2"'
+> '; set semVerLimit := "2.0.2"'
 > compile
 > assertAborted
 
 > reload
 > startTest not_normalized_publish_patch_no_limit
-> '; set semVerVersionLimit := ""; set versionOverride := Some("2.0.2") ; set version := versionOverride.value.get'
+> '; set semVerLimit := ""; set versionOverride := Some("2.0.2") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed "not normalized"
 
 > reload
 > startTest not_normalized_publish_patch_with_limit
-> '; set semVerVersionLimit := "9.9.9"; set versionOverride := Some("2.0.2") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "9.9.9"; set versionOverride := Some("2.0.2") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed "not normalized"
 
@@ -970,19 +970,19 @@ $ exec git commit -a -m "Minor commit"
 
 > reload
 > startTest not_normalized_compile_minor_with_limit
-> '; set semVerVersionLimit := "2.2.0"'
+> '; set semVerLimit := "2.2.0"'
 > compile
 > assertAborted
 
 > reload
 > startTest not_normalized_publish_minor_no_limit
-> '; set semVerVersionLimit := ""; set versionOverride := Some("2.2.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := ""; set versionOverride := Some("2.2.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed "not normalized"
 
 > reload
 > startTest not_normalized_publish_minor_with_limit
-> '; set semVerVersionLimit := "9.9.9"; set versionOverride := Some("2.2.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "9.9.9"; set versionOverride := Some("2.2.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed "not normalized"
 
@@ -997,19 +997,19 @@ $ exec git commit -a -m "Major commit"
 
 > reload
 > startTest not_normalized_compile_major_with_limit
-> '; set semVerVersionLimit := "4.0.0"'
+> '; set semVerLimit := "4.0.0"'
 > compile
 > assertAborted
 
 > reload
 > startTest not_normalized_publish_major_no_limit
-> '; set semVerVersionLimit := ""; set versionOverride := Some("4.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := ""; set versionOverride := Some("4.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed "not normalized"
 
 > reload
 > startTest not_normalized_publish_major_with_limit
-> '; set semVerVersionLimit := "9.9.9"; set versionOverride := Some("5.0.0") ; set version := versionOverride.value.get'
+> '; set semVerLimit := "9.9.9"; set versionOverride := Some("5.0.0") ; set version := versionOverride.value.get'
 -> publishLocal
 > assertFailed "not normalized"
 

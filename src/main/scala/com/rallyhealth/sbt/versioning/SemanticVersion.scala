@@ -214,12 +214,12 @@ object ReleaseVersion {
     *
     * For example:
     * {{{
-    *   val rallyVersioningSnapshotLowerBound = settingKey[Option[ReleaseVersion]]("...")
-    *   rallyVersioningSnapshotLowerBound := "1.2.3"
+    *   val gitVersioningSnapshotLowerBound = settingKey[Option[ReleaseVersion]]("...")
+    *   gitVersioningSnapshotLowerBound := "1.2.3"
     * }}}
     *
     * {{{
-    *   sbt> set rallyVersioningSnapshotLowerBound := "1.2.3"
+    *   sbt> set gitVersioningSnapshotLowerBound := "1.2.3"
     * }}}
     */
   implicit def fromStringToMaybeReleaseVersion(s: String): Option[ReleaseVersion] = unapply(s)

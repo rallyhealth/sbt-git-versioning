@@ -27,5 +27,5 @@ lazy val enabled = project
   .enablePlugins(SemVerPlugin)
   .settings(
     semVerPreRelease := true,
-    semVerVersionLimit := "1.999.0"
+    semVerLimit := "1.999.0"
   )

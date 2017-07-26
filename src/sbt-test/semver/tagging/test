@@ -51,11 +51,11 @@ $ exec git commit -am 'Major change'
 $ exec git tag v1.0.0
 > reload
 
-# Version now exceeds the semVerVersionLimit of 0.999.0
+# Version now exceeds the semVerLimit of 0.999.0
 -> semVerCheck
 
-# Version now exceeds the semVerVersionLimit of 0.999.0
-> 'set semVerVersionLimit := "1.0.0"'
+# Version now exceeds the semVerLimit of 0.999.0
+> 'set semVerLimit := "1.0.0"'
 
 # All good now.
 > semVerCheck
@@ -64,10 +64,10 @@ $ exec git tag v1.0.0
 $ exec git tag -d v1.0.0
 > reload
 
-# Version now exceeds the semVerVersionLimit of 0.999.0
-> 'set semVerVersionLimit := "1.0.0"'
+# Version now exceeds the semVerLimit of 0.999.0
+> 'set semVerLimit := "1.0.0"'
 
-# Version is within the semVerVersionLimit of 1.0.0
+# Version is within the semVerLimit of 1.0.0
 > semVerCheck
 
 # Release major version
@@ -81,8 +81,8 @@ $ exec git tag -d v1.0.0
 $ exec git tag v0.1.1
 > reload
 
-# The semVerVersionLimit has no issue with publishing a major change at a minor version
-> 'set semVerVersionLimit := "1.0.0"'
+# The semVerLimit has no issue with publishing a major change at a minor version
+> 'set semVerLimit := "1.0.0"'
 
 # We should NOT be allowed to publish v0.1.1 with breaking changes
 -> publishLocal
