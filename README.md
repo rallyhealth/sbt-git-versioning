@@ -22,11 +22,11 @@ Alternatively, you can add the following (if you want to use Maven style resolut
 ```scala
   Resolver.bintrayRepo("rallyhealth", "sbt-plugins")
 ```
-In either case, you should now be able to add the append the plugin dependency to the `project/plugins.sbt`:
+In either case, you should now be able to add the plugin dependency to `project/plugins.sbt`:
 ```scala
   addSbtPlugin("com.rallyhealth.sbt" % "git-versioning-sbt-plugin" % "x.y.z")
 ```
-3. Enable the plugin and set `semVerVersionLimit` in `build.sbt` (see
+3. Enable the plugin and set `semVerLimit` in `build.sbt` (see
  [below](https://github.com/rallyhealth/git-versioning-sbt-plugin#semverversionlimit)
  for details)
 
@@ -34,7 +34,7 @@ In either case, you should now be able to add the append the plugin dependency t
 val example = project
   .enablePlugins(SemVerPlugin)
   // See https://github.com/rallyhealth/git-versioning-sbt-plugin#semverversionlimit
-  .settings(semVerVersionLimit := "x.y.z")
+  .settings(semVerLimit := "x.y.z")
 ```
 
 # GitVersioningPlugin
@@ -196,7 +196,7 @@ You can run the check manually using `semVerCheck`. The check and also be run au
 
 The output will look like this:
 ```
-[info] [SemVer] Checking ENABLED with LIMIT target semVerVersionLimit=3.0.0
+[info] [SemVer] Checking ENABLED with LIMIT target semVerLimit=3.0.0
 [info] [SemVer] Check starting (prev=2.0.0 vs curr=3.0.0) ...
 [warn] [SemVer] Errors total=4, backward=0, forward=4, required diffType=minor
 [warn] [SemVer] (1/4) Forward -> method calamity()Double in class com.rallyhealth.semver.Equestria does not have a correspondent in previous version
@@ -209,7 +209,7 @@ The output will look like this:
 
 When the SemVerPlugin halts the build it will look like:
 ```
-[info] [SemVer] Checking ENABLED with LIMIT target semVerVersionLimit=2.0.1
+[info] [SemVer] Checking ENABLED with LIMIT target semVerLimit=2.0.1
 [info] [SemVer] Check starting (prev=2.0.0 vs curr=2.0.1) ...
 [error] [SemVer] Errors total=4, backward=0, forward=4, required diffType=minor
 [error] [SemVer] (1/4) Forward -> method calamity()Double in class com.rallyhealth.semver.Equestria does not have a correspondent in previous version
@@ -224,24 +224,24 @@ java.lang.IllegalStateException: Proposed RELEASE version=2.0.1 FAILED SemVer ru
 [error] Total time: 2 s, completed Nov 15, 2016 3:27:36 PM
 ```
 
-### semVerVersionLimit
+### semVerLimit
 
-Before using the check (manually or automatically), you *must* set the `semVerVersionLimit` key in your `build.sbt`.
+Before using the check (manually or automatically), you *must* set the `semVerLimit` key in your `build.sbt`.
 This is a version (e.g. "1.2.3") that tells SemVerPlugin when to halt the build. It prevents you from making any
 compatibility changes that would *exceed* that version.
 
 This is best explained with an example. Let's assume the latest tag is `1.2.3`:
 
-* `semVerVersionLimit := 1.2.3` - you won't be able to make *any* changes
-* `semVerVersionLimit := 1.2.**999**` - you will be allowed to make *patch* changes.
-* `semVerVersionLimit := 1.**999.999**` - you will be allowed to make *minor or patch* changes.
-* `semVerVersionLimit := ""` - you will be allowed to make *major, minor, or patch* changes (`semVerVersionLimit` is disabled)
+* `semVerLimit := 1.2.3` - you won't be able to make *any* changes
+* `semVerLimit := 1.2.**999**` - you will be allowed to make *patch* changes.
+* `semVerLimit := 1.**999.999**` - you will be allowed to make *minor or patch* changes.
+* `semVerLimit := ""` - you will be allowed to make *major, minor, or patch* changes (`semVerLimit` is disabled)
 
-Here are a few stories to illustrate how `semVerVersionLimit` works.
+Here are a few stories to illustrate how `semVerLimit` works.
 
 #### Patch Change
 
-1. Version is `1.2.3` and `semVerVersionLimit := 1.9.9`:
+1. Version is `1.2.3` and `semVerLimit := 1.9.9`:
 2. Fluttershy needs to fix a bug (patch change).
 3. Fluttershy fixes, sees no backward or forward errors from SemVerPlugin.
 4. Fluttershy commits, PRs, and merges.
@@ -249,7 +249,7 @@ Here are a few stories to illustrate how `semVerVersionLimit` works.
 
 #### Minor Change (with a human error)
 
-1. Version is `1.2.4` (from above) and `semVerVersionLimit := 1.9.9`:
+1. Version is `1.2.4` (from above) and `semVerLimit := 1.9.9`:
 2. Applejack wants to add a new method (minor change).
 3. Applejack adds the new method, commits, PRs, and merges.
 4. Applejack runs the release job for `1.2.4` but the release job fails.
@@ -258,7 +258,7 @@ Here are a few stories to illustrate how `semVerVersionLimit` works.
 
 #### A 'Big' Patch Change
 
-1. Version is `1.3.0` (from above) and `semVerVersionLimit := 1.9.9`:
+1. Version is `1.3.0` (from above) and `semVerLimit := 1.9.9`:
 2. Twilight Sparkle found a potential bug for an edge case, e.g. some
 'undefined' behavior. She only needs to make a *patch* change, but
 someone could be relying on that 'undefined' behavior, she wants to release
@@ -270,37 +270,37 @@ change even though only *patch* was required)
 
 #### Hot Fix (patch change)
 
-1. Version is `1.4.0` (from above) and `semVerVersionLimit := 1.9.9`:
+1. Version is `1.4.0` (from above) and `semVerLimit := 1.9.9`:
 2. Rainbow Dash needs to make a hot fix.
-3. Rainbow Dash changes `semVerVersionLimit := 1.4.1` so she's absolutely sure no minor changes sneak in.
+3. Rainbow Dash changes `semVerLimit := 1.4.1` so she's absolutely sure no minor changes sneak in.
 4. Rainbow Dash makes her fix, commits, PRs, and merges
 5. Rainbow Dash successfully runs the release job for `1.4.1`.
-6. *Unfortunately the next committer will need to reset `semVerVersionLimit := 1.9.9`*
-7. Rainbow Dash helpfully merges a PR to revert `semVerVersionLimit := 1.9.9`
+6. *Unfortunately the next committer will need to reset `semVerLimit := 1.9.9`*
+7. Rainbow Dash helpfully merges a PR to revert `semVerLimit := 1.9.9`
 
 #### Hot Fix Redux (patch change)
 
-1. Version is `1.4.1` (from above) and `semVerVersionLimit := 1.9.9`:
+1. Version is `1.4.1` (from above) and `semVerLimit := 1.9.9`:
 2. Pinkie Pie needs to make another hot fix.
 3. Pinkie Pie does not want to do a clean up commit like Rainbow Dash.
-4. Pinkie Pie runs SBT and executes ```> set semVerVersionLimit := 1.4.2``` before any other command.
+4. Pinkie Pie runs SBT and executes ```> set semVerLimit := 1.4.2``` before any other command.
 5. Pinkie Pie makes her fix, commits, PRs
 6. Pinkie Pie successfully runs the release job for `1.4.2`.
 
 #### Major Change
 
-1. Version is `1.4.2` (from above) and `semVerVersionLimit := 1.9.9`:
+1. Version is `1.4.2` (from above) and `semVerLimit := 1.9.9`:
 2. Rarity wants to make a major breaking API change.
-3. Rarity changes `semVerVersionLimit := 2.0.0` so she can release `2.9.9` when she is done.
+3. Rarity changes `semVerLimit := 2.0.0` so she can release `2.9.9` when she is done.
 4. Rarity makes her API change, commits, PRs, and merges.
 5. Rarity successfully runs the release job for `2.0.0`.
 
-#### What should you choose for `semVerVersionLimit`?
+#### What should you choose for `semVerLimit`?
 
 * First, talk to the team working on the service, or the users of the library. What do they want?
-* If you want to allow any backward compatible changes might choose a limit like `semVerVersionLimit := 1.999.999`
-* If you want to avoid changes you might choose a limit like `semVerVersionLimit := 1.0.999`
-* If you don't care about *any* changes you can disable the limt using `semVerVersionLimit := ""`.
+* If you want to allow any backward compatible changes might choose a limit like `semVerLimit := 1.999.999`
+* If you want to avoid changes you might choose a limit like `semVerLimit := 1.0.999`
+* If you don't care about *any* changes you can disable the limt using `semVerLimit := ""`.
 
 ## Information
 

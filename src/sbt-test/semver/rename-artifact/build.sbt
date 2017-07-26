@@ -8,7 +8,7 @@ logLevel := sbt.Level.Info
 
 enablePlugins(SemVerPlugin)
 
-semVerVersionLimit := "1.999.0"
+semVerLimit := "1.999.0"
 
 semVerPreRelease := true
 

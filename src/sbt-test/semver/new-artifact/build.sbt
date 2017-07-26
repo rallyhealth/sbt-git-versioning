@@ -8,7 +8,7 @@ logLevel := sbt.Level.Info
 
 enablePlugins(SemVerPlugin)
 
-semVerVersionLimit in ThisBuild := "2.999.0"
+semVerLimit in ThisBuild := "2.999.0"
 
 lazy val root = (project in file("."))
   .aggregate(foo, bar)

@@ -40,8 +40,8 @@ object SemVerPlugin extends AutoPlugin {
       * This is really a setting, but settings are checked at startup so if any are missing or throw exceptions SBT
       * fails to load. But tasks won't be checked until they are actually used, so its like a lazy setting.
       */
-    lazy val semVerVersionLimit: TaskKey[String] = taskKey[String](
-      "'semVerVersionLimit' is a threshold Release version, it is a version you do NOT want to exceed with these" +
+    lazy val semVerLimit: TaskKey[String] = taskKey[String](
+      "'semVerLimit' is a threshold Release version, it is a version you do NOT want to exceed with these" +
         " changes. If non-empty the `semVerCheck` will ensure that your changes do not require a release EQUAL or" +
         " GREATER than this version. (no default value)")
 
@@ -86,16 +86,16 @@ object SemVerPlugin extends AutoPlugin {
       * If you don't provide this a value you get a rather generic error as soon as you run SBT:
       * {{{
       * References to undefined settings:
-      *   :semVerVersionLimit from *:test ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
-      *   :semVerVersionLimit from *:publishLocal ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
-      *   :semVerVersionLimit from *:compile ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
-      *   :semVerVersionLimit from *:semVerCheck ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
+      *   :semVerLimit from *:test ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
+      *   :semVerLimit from *:publishLocal ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
+      *   :semVerLimit from *:compile ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
+      *   :semVerLimit from *:semVerCheck ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
       * }}}
       * I think a clear error message that allows you to load SBT an fail when you run the task is a better choice.
       */
-    semVerVersionLimit := {
+    semVerLimit := {
       throw new IllegalArgumentException(
-        s"${SemVerPluginUtils.ConfigErrorPrefix} 'semVerVersionLimit' is not set in your 'build.sbt'"
+        s"${SemVerPluginUtils.ConfigErrorPrefix} 'semVerLimit' is not set in your 'build.sbt'"
       )
     }
   )

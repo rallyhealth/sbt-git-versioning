@@ -63,7 +63,7 @@ object GitVersioningPlugin extends AutoPlugin {
       * up to v2.0.0-4-aabcdef-SNAPSHOT without tagging:
       *
       * {{{
-      *   rallyVersionSnapshotLowerBound := "2.0.0"
+      *   gitVersioningSnapshotLowerBound := "2.0.0"
       * }}}
       *
       * [[gitVersioningSnapshotLowerBound]] acts as a lower bound and has no effect

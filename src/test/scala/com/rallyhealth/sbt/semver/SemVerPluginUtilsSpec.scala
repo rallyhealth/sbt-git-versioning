@@ -26,19 +26,19 @@ class SemVerPluginUtilsSpec extends FunSpec {
         }
       }
 
-      it("invalid semVerVersionLimit") {
+      it("invalid semVerLimit") {
         val versionFromGit = ReleaseVersion.initialVersion
         intercept[IllegalArgumentException] {
           SemVerPluginUtils.calcTargetVersion(None, "whatever", versionFromGit, NullSbtLogger)
         }
       }
 
-      it("dirty semVerVersionLimit") {
+      it("dirty semVerLimit") {
         val versionFromGit = ReleaseVersion.initialVersion
-        val semVerVersionLimit = ReleaseVersion(1, 2, 3, SemVerIdentifierList.empty, isDirty = true)
+        val semVerLimit = ReleaseVersion(1, 2, 3, SemVerIdentifierList.empty, isDirty = true)
         intercept[IllegalArgumentException] {
           SemVerPluginUtils.calcTargetVersion(
-            None, semVerVersionLimit.toString, versionFromGit, NullSbtLogger)
+            None, semVerLimit.toString, versionFromGit, NullSbtLogger)
         }
       }
     }
@@ -74,7 +74,7 @@ class SemVerPluginUtilsSpec extends FunSpec {
 
       describe("versionOverride has first precedence") {
 
-        it("versionOverride with semVerVersionLimit") {
+        it("versionOverride with semVerLimit") {
           val versionOverride = ReleaseVersion(1, 2, 3, SemVerIdentifierList.empty, isDirty = false)
           val semVerLimitVersion = ReleaseVersion(2, 0, 0, SemVerIdentifierList.empty, isDirty = false)
           val versionFromGit = ReleaseVersion.initialVersion
@@ -83,7 +83,7 @@ class SemVerPluginUtilsSpec extends FunSpec {
           assert(target.get.version === versionOverride)
         }
 
-        it("versionOverride without semVerVersionLimit") {
+        it("versionOverride without semVerLimit") {
           val versionOverride = ReleaseVersion(1, 2, 3, SemVerIdentifierList.empty, isDirty = false)
           val versionFromGit = ReleaseVersion.initialVersion
           val target = SemVerPluginUtils.calcTargetVersion(
@@ -110,9 +110,9 @@ class SemVerPluginUtilsSpec extends FunSpec {
       }
     }
 
-    describe("versionOverride vs semVerVersionLimit") {
+    describe("versionOverride vs semVerLimit") {
 
-      it("versionOverride == semVerVersionLimit (limit will updating next time)") {
+      it("versionOverride == semVerLimit (limit will updating next time)") {
         val versionOverride = ReleaseVersion(2, 0, 0, SemVerIdentifierList.empty, isDirty = false)
         val semVerLimitVersion = ReleaseVersion(2, 0, 0, SemVerIdentifierList.empty, isDirty = false)
         val versionFromGit = ReleaseVersion.initialVersion
@@ -121,7 +121,7 @@ class SemVerPluginUtilsSpec extends FunSpec {
         assert(target.get.version === versionOverride)
       }
 
-      it("versionOverride < semVerVersionLimit") {
+      it("versionOverride < semVerLimit") {
         val versionOverride = ReleaseVersion(1, 9, 9, SemVerIdentifierList.empty, isDirty = false)
         val semVerLimitVersion = ReleaseVersion(2, 0, 0, SemVerIdentifierList.empty, isDirty = false)
         val versionFromGit = ReleaseVersion.initialVersion
@@ -130,7 +130,7 @@ class SemVerPluginUtilsSpec extends FunSpec {
         assert(target.get.version === versionOverride)
       }
 
-      it("versionOverride > semVerVersionLimit (limit needs updating)") {
+      it("versionOverride > semVerLimit (limit needs updating)") {
         val versionOverride = ReleaseVersion(2, 0, 0, SemVerIdentifierList.empty, isDirty = false)
         val semVerLimitVersion = ReleaseVersion(1, 9, 9, SemVerIdentifierList.empty, isDirty = false)
         val versionFromGit = ReleaseVersion.initialVersion
@@ -180,7 +180,7 @@ class SemVerPluginUtilsSpec extends FunSpec {
             }
           }
 
-          describe("semVerVersionLimit") {
+          describe("semVerLimit") {
 
             it("only versionFromGit") {
               val versionFromGit = ReleaseVersion(1, 9, 9, SemVerIdentifierList.empty, isDirty = false)
@@ -249,7 +249,7 @@ class SemVerPluginUtilsSpec extends FunSpec {
             }
           }
 
-          describe("semVerVersionLimit") {
+          describe("semVerLimit") {
 
             it("only versionFromGit") {
               val versionFromGit = ReleaseVersion(1, 9, 9, SemVerIdentifierList.empty, isDirty = true)
@@ -328,7 +328,7 @@ class SemVerPluginUtilsSpec extends FunSpec {
             }
           }
 
-          describe("semVerVersionLimit") {
+          describe("semVerLimit") {
 
             it("only versionFromGit") {
               val versionFromGit = SnapshotVersion(2, 0, 0, SemVerIdentifierList.empty, isDirty = false, "0123abc", 1)
@@ -405,7 +405,7 @@ class SemVerPluginUtilsSpec extends FunSpec {
             }
           }
 
-          describe("semVerVersionLimit") {
+          describe("semVerLimit") {
 
             it("only versionFromGit") {
               val versionFromGit = SnapshotVersion(2, 0, 0, SemVerIdentifierList.empty, isDirty = true, "0123abc", 1)

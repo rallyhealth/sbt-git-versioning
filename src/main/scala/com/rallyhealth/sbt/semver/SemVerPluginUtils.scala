@@ -30,7 +30,7 @@ object SemVerPluginUtils {
     // often hard to mock
 
     // "version" SettingKey is assumed to be a SemanticVersion; see the overload in RallyVersioningPlugin
-    val rallyVersion: SemanticVersion = SemanticVersion.fromString(version.value).getOrElse(
+    val semver: SemanticVersion = SemanticVersion.fromString(version.value).getOrElse(
       throw new IllegalArgumentException(s"version=${version.value} is not a valid SemVer"))
     val enforceAfterVersion: Option[ReleaseVersion] = semVerEnforceAfterVersion.value.map(parseAsCleanOrThrow)
 
@@ -38,15 +38,15 @@ object SemVerPluginUtils {
     val taskStreams: TaskStreams = streams.value
     implicit val logger: sbt.Logger = taskStreams.log
 
-    if (rallyVersion.isPreRelease && !preReleaseEnabled) {
-      logger.info(s"$SemVerPrefix Checking DISABLED for pre-release version=$rallyVersion")
-    } else if (enforceAfterVersion.isDefined && rallyVersion <= enforceAfterVersion.get) {
-      logger.info(s"$SemVerPrefix Checking DISABLED for version=$rallyVersion less than or equal to" +
+    if (semver.isPreRelease && !preReleaseEnabled) {
+      logger.info(s"$SemVerPrefix Checking DISABLED for pre-release version=$semver")
+    } else if (enforceAfterVersion.isDefined && semver <= enforceAfterVersion.get) {
+      logger.info(s"$SemVerPrefix Checking DISABLED for version=$semver less than or equal to" +
         s" enforceAfterVersion=${enforceAfterVersion.get} $noViolationsSuffix")
     } else {
 
       val maybeTargetVersion = calcTargetVersion(
-        versionOverride.value, semVerVersionLimit.value, versionFromGit.value, logger)
+        versionOverride.value, semVerLimit.value, versionFromGit.value, logger)
 
       maybeTargetVersion.foreach { targetVersion =>
 
@@ -125,7 +125,7 @@ object SemVerPluginUtils {
     * Figures out the version we will be using for SemVer checking, the "target" version. The target version either:
     * - [[versionOverride]] (if available) is the version the developer is trying to release.
     * - [[versionFromGit]] (if a clean release) is the version of the actual code.
-    * - [[semVerVersionLimit]] (if available) the version the developer wants to stay under.
+    * - [[semVerLimit]] (if available) the version the developer wants to stay under.
     * If none of these are available then SemVer checking will be disabled.
     *
     * Why do we not consider [[version]]? The [[version]] is not necessarily what the developer wants -- it is either
@@ -134,7 +134,7 @@ object SemVerPluginUtils {
     * the last release version).
     *
     * @param maybeVersionOverrideStr From [[versionOverride]]
-    * @param versionLimitStr From [[semVerVersionLimit]]
+    * @param versionLimitStr From [[semVerLimit]]
     * @param versionFromGit From [[versionFromGit]] from [[GitDriver.calcCurrentVersion()]] -- NOT [[version]] since
     * could be either [[versionOverride]] or [[versionFromGit]]
     * @return The version we will target for the SemVer comparison, or None to disable SemVer checking.
@@ -166,14 +166,14 @@ object SemVerPluginUtils {
         logger.info(s"$SemVerPrefix Checking ENABLED with SPECIFIC target versionFromGit=$versionFromGit")
         Some(SemVerSpecificTargetVersion(verFromGit))
 
-      // semVerVersionLimit has the third highest precedence (limit < specific)
+      // semVerLimit has the third highest precedence (limit < specific)
       case (None, Some(verLimit), _) =>
-        logger.info(s"$SemVerPrefix Checking ENABLED with LIMIT target semVerVersionLimit=$verLimit")
+        logger.info(s"$SemVerPrefix Checking ENABLED with LIMIT target semVerLimit=$verLimit")
         Some(SemVerLimitTargetVersion(verLimit))
 
       case (None, None, _) =>
         logger.info(
-          s"$SemVerPrefix Checking DISABLED with empty semVerVersionLimit, empty versionOverride, and dirty and/or" +
+          s"$SemVerPrefix Checking DISABLED with empty semVerLimit, empty versionOverride, and dirty and/or" +
             " SNAPSHOT versionFromGit")
         None
     }
@@ -193,7 +193,7 @@ object SemVerPluginUtils {
     * a nonsensical situation.
     *
     * @param maybeVersionOverride From [[versionOverride]]
-    * @param maybeVersionLimit From [[semVerVersionLimit]]
+    * @param maybeVersionLimit From [[semVerLimit]]
     * @param versionFromGit From [[versionFromGit]] from [[GitDriver.calcCurrentVersion()]] -- NOT [[version]] since
     * could be either [[versionOverride]] or [[versionFromGit]]
     * @return The version we will target for the SemVer comparison, or None to disable SemVer checking.
@@ -215,7 +215,7 @@ object SemVerPluginUtils {
     Option((maybeVersionOverride, maybeVersionLimit, versionFromGit)).collect {
 
       case (Some(verOverride), Some(verLimit), _) if verOverride > verLimit =>
-        s"semVerVersionLimit=$verLimit cannot be less than versionOverride=$verOverride;" +
+        s"semVerLimit=$verLimit cannot be less than versionOverride=$verOverride;" +
           " your limit wasn't updated after the last release, and would likely prevent ANY new changes"
 
       // this is most likely a user error -- you are forcing a version with uncommitted changes. you typically force
@@ -238,16 +238,16 @@ object SemVerPluginUtils {
         s"versionOverride=$verOverride cannot be less than or equal to SNAPSHOT version=$verGit;" +
           " cannot create new release with un-tagged commits that are less previously released version"
 
-      // we do NOT check EQUAL here because its okay if semVerVersionLimit matches the versionFromGit: it usually means
+      // we do NOT check EQUAL here because its okay if semVerLimit matches the versionFromGit: it usually means
       // the developer tagged FIRST and updated the limit. That's a valid order of operations -- SemVer will still
       // catch if new changes are made beyond that tag
       case (_, Some(verLimit), verGit: ReleaseVersion) if verLimit < verGit =>
-        s"semVerVersionLimit=$verLimit cannot be less than or equal to version=$verGit;" +
+        s"semVerLimit=$verLimit cannot be less than or equal to version=$verGit;" +
           " your limit prevents new ANY changes, update it to something greater than the last release"
 
       // Same as above, but we have to fix the version due to the incrementing done by GitDriver.calcCurrentVersion()
       case (_, Some(verLimit), verGit: SnapshotVersion) if verLimit <= verGit.undoNextVersion().toRelease =>
-        s"semVerVersionLimit=$verLimit cannot be less than or equal version=$verGit;" +
+        s"semVerLimit=$verLimit cannot be less than or equal version=$verGit;" +
           " your limit prevents new ANY changes, update it to something greater than the last release"
 
     }.foreach {
