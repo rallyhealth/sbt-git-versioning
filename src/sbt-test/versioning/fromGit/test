@@ -1,5 +1,5 @@
 ############################################################################################################
-# Basic sanity tests for RallyVersioningPlugin
+# Basic sanity tests for GitVersioningPlugin
 
 # Init the repo
 $ exec git init

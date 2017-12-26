@@ -1,6 +1,6 @@
 ############################################################################################################
-# Tests for odd behavior for RallyVersioningPlugin. Not necessarily wrong, but definitely less obvious
-# to those who are not intimately familiar with all the dark magic in RallyVersioningPlugin.
+# Tests for odd behavior for GitVersioningPlugin. Not necessarily wrong, but definitely less obvious
+# to those who are not intimately familiar with all the dark magic in GitVersioningPlugin.
 
 # I've tried to call out the "odd" behavior with triple bang "!!!"
 

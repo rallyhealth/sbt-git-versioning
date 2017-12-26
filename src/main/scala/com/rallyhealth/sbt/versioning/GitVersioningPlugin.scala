@@ -152,7 +152,7 @@ object GitVersioningPlugin extends AutoPlugin {
       (autoFetchResult in ThisProject).value
       val gitVersion = gitDriver.value.calcCurrentVersion(ignoreDirty.value)
 
-      ConsoleLogger().info(s"RallyVersioningPlugin set versionFromGit=$gitVersion")
+      ConsoleLogger().info(s"GitVersioningPlugin set versionFromGit=$gitVersion")
 
       gitVersion
     },
@@ -167,7 +167,7 @@ object GitVersioningPlugin extends AutoPlugin {
               throw new IllegalArgumentException(msg)
             }
 
-          ConsoleLogger().info(s"RallyVersioningPlugin set versionOverride=$versionOverrideStr")
+          ConsoleLogger().info(s"GitVersioningPlugin set versionOverride=$versionOverrideStr")
           ver.toString
       }
     },
@@ -204,7 +204,7 @@ object GitVersioningPlugin extends AutoPlugin {
       }
 
       val version = verOverride.getOrElse(boundedVersionFromGit).toString
-      ConsoleLogger().info(s"RallyVersioningPlugin set version=$version")
+      ConsoleLogger().info(s"GitVersioningPlugin set version=$version")
       version
     },
 
@@ -214,7 +214,7 @@ object GitVersioningPlugin extends AutoPlugin {
         .getOrElse(throw new IllegalArgumentException(s"cannot parse version=${version.value}"))
         .isDirty
 
-      ConsoleLogger().info(s"RallyVersioningPlugin set isCleanRelease=${!isDirty}")
+      ConsoleLogger().info(s"GitVersioningPlugin set isCleanRelease=${!isDirty}")
 
       !isDirty
     },

@@ -2,7 +2,7 @@
 # Uses "tag then publish" workflow.
 ###########################################################################################################
 
-# Set up a git repo appease RallyVersioningPlugin and tag first version.
+# Set up a git repo appease GitVersioningPlugin and tag first version.
 $ exec git init
 $ exec git add .
 $ exec git commit -am 'Initial commit.'

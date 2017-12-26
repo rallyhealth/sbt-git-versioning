@@ -29,7 +29,7 @@ object SemVerPluginUtils {
     // effectively. It depends on a lot of different SBT settings, and extracting them is a) messy and b) they are
     // often hard to mock
 
-    // "version" SettingKey is assumed to be a SemanticVersion; see the overload in RallyVersioningPlugin
+    // "version" SettingKey is assumed to be a SemanticVersion; see the overload in GitVersioningPlugin
     val semver: SemanticVersion = SemanticVersion.fromString(version.value).getOrElse(
       throw new IllegalArgumentException(s"version=${version.value} is not a valid SemVer"))
     val enforceAfterVersion: Option[ReleaseVersion] = semVerEnforceAfterVersion.value.map(parseAsCleanOrThrow)
