@@ -27,13 +27,13 @@ In either case, you should now be able to add the plugin dependency to `project/
   addSbtPlugin("com.rallyhealth.sbt" % "git-versioning-sbt-plugin" % "x.y.z")
 ```
 3. Enable the plugin and set `semVerLimit` in `build.sbt` (see
- [below](https://github.com/rallyhealth/git-versioning-sbt-plugin#semverversionlimit)
+ [below](https://github.com/rallyhealth/git-versioning-sbt-plugin#semverlimit)
  for details)
 
 ```scala
 val example = project
   .enablePlugins(SemVerPlugin)
-  // See https://github.com/rallyhealth/git-versioning-sbt-plugin#semverversionlimit
+  // See https://github.com/rallyhealth/git-versioning-sbt-plugin#semverlimit
   .settings(semVerLimit := "x.y.z")
 ```
 

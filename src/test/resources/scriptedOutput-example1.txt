@@ -139,9 +139,9 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mSkipping fetching tags from git remotes; to enable, set the system property version.autoFetch=true[0m[0m
 [0m[[0minfo[0m] [0m[ScriptedUtils] sideChannelFile: /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/sbt_6c5b0244/sanity/scriptedOutput-1480303571457.link.txt[0m
 [0m[[0minfo[0m] [0m[ScriptedUtils] bufferedFile: /var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/scriptedOutput-2194719900698081813.log.txt[0m
-[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mRallyVersioningPlugin set versionFromGit=0.0.1[0m[0m
-[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mRallyVersioningPlugin set version=0.0.1[0m[0m
-[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mRallyVersioningPlugin set isCleanRelease=true[0m[0m
+[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mGitVersioningPlugin set versionFromGit=0.0.1[0m[0m
+[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mGitVersioningPlugin set version=0.0.1[0m[0m
+[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mGitVersioningPlugin set isCleanRelease=true[0m[0m
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mSet current project to sanity (in build file:/private/var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/sbt_6c5b0244/sanity/)[0m[0m
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0m[ScriptedUtils] Starting load_plugin ----------------------------[0m[0m
 [0m[[0minfo[0m] [0m[0m[[32msuccess[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:22 PM[0m[0m
@@ -152,7 +152,7 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m	sbt.plugins.JUnitXmlReportPlugin: enabled in sanity[0m
 [0m[[0minfo[0m] [0m	sbt.plugins.Giter8TemplatePlugin: enabled in sanity[0m
 [0m[[0minfo[0m] [0m	com.rallyhealth.semver.SemVerPlugin: enabled in sanity[0m
-[0m[[0minfo[0m] [0m	com.rallyhealth.versioning.RallyVersioningPlugin: enabled in sanity[0m
+[0m[[0minfo[0m] [0m	com.rallyhealth.versioning.GitVersioningPlugin: enabled in sanity[0m
 [0m[[0minfo[0m] [0m	com.typesafe.tools.mima.plugin.MimaPlugin: enabled in sanity[0m
 [0m[[0minfo[0m] [0m[0m[[32msuccess[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:22 PM[0m[0m
 [0m[[0minfo[0m] [0m[0m[[32msuccess[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:22 PM[0m[0m

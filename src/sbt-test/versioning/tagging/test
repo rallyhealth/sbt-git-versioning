@@ -1,5 +1,5 @@
 ############################################################################################################
-# Tagging tests for RallyVersioningPlugin, some sane, some pathological
+# Tagging tests for GitVersioningPlugin, some sane, some pathological
 
 # Init the repo
 $ exec git init
