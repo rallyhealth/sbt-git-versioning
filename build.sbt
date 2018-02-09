@@ -1,11 +1,11 @@
-import sbt._
-
 sbtPlugin := true
 
 name := "git-versioning-sbt-plugin"
 organizationName := "Rally Health"
 organization := "com.rallyhealth.sbt"
-version := "0.0.2"
+
+enablePlugins(SemVerPlugin)
+semVerLimit := "1.0.999"
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 
 bintrayOrganization := Some("rallyhealth")
