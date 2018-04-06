@@ -114,7 +114,7 @@ object SemVerPlugin extends AutoPlugin {
      * WARNING to anyone who might think "This doesn't need Def.taskDyn {}" YES IT DOES -- I've written this at least a
      * dozen different ways trying to remove Def.taskDyn {} and it doesn't work. This might compile, it might run, but
      * it won't run correctly in ALL cases. This means it might run semVerCheck() more than once, which sucks, but that's
-     * FAAAR better than not running at all. If you do change this YOU MUST RUN git-versioning-sbt-plugin-test/checkSemver.sh
+     * FAAAR better than not running at all. If you do change this YOU MUST RUN sbt-git-versioning-test/checkSemver.sh
      * because that will check all the different scenarios.
      *
      * I use Def.taskDyn {} here because otherwise the conditional actually doesn't do anything. Even though it looks

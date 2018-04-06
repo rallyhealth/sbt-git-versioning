@@ -1,4 +1,4 @@
-**git-versioning-sbt-plugin** is an sbt plugin designed to make maintaining a simple, consistent, and accurate
+**sbt-git-versioning** is an sbt plugin designed to make maintaining a simple, consistent, and accurate
  [semantic versioning](http://semver.org/spec/v2.0.0.html) scheme with as little manual labor as possible.
 
 There are two sbt plugins in this one plugin library:
@@ -24,16 +24,16 @@ Alternatively, you can add the following (if you want to use Maven style resolut
 ```
 In either case, you should now be able to add the plugin dependency to `project/plugins.sbt`:
 ```scala
-  addSbtPlugin("com.rallyhealth.sbt" % "git-versioning-sbt-plugin" % "x.y.z")
+  addSbtPlugin("com.rallyhealth.sbt" % "sbt-git-versioning" % "x.y.z")
 ```
 3. Enable the plugin and set `semVerLimit` in `build.sbt` (see
- [below](https://github.com/rallyhealth/git-versioning-sbt-plugin#semverlimit)
+ [below](https://github.com/rallyhealth/sbt-git-versioning#semverlimit)
  for details)
 
 ```scala
 val example = project
   .enablePlugins(SemVerPlugin)
-  // See https://github.com/rallyhealth/git-versioning-sbt-plugin#semverlimit
+  // See https://github.com/rallyhealth/sbt-git-versioning#semverlimit
   .settings(semVerLimit := "x.y.z")
 ```
 
