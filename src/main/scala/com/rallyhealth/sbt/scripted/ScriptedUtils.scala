@@ -12,7 +12,7 @@ import scala.util.Try
   * Implementation of the various assert-style methods that are used by the "test" script. This uses a
   * [[BufferedLog]] as the source of the data that this will assert against.
   *
-  * This class lives within the `git-versioning-sbt-plugin` project and not in the `scripted` test code because IntelliJ
+  * This class lives within the `sbt-git-versioning` project and not in the `scripted` test code because IntelliJ
   * correctly recognizes these files, unlike the files within the `scripted` test code.
   */
 object ScriptedUtils {

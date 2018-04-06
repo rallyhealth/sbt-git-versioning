@@ -1,6 +1,6 @@
 sbtPlugin := true
 
-name := "git-versioning-sbt-plugin"
+name := "sbt-git-versioning"
 organizationName := "Rally Health"
 organization := "com.rallyhealth.sbt"
 
