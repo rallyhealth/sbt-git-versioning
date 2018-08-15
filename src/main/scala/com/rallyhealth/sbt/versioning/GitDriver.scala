@@ -1,6 +1,8 @@
 package com.rallyhealth.sbt.versioning
 
-import sbt.{Process, _}
+import java.io.File
+
+import scala.sys.process._
 
 /**
   * Driver that allows executing common commands against a git working directory.

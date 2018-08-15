@@ -10,9 +10,9 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m	5 artifacts copied, 0 already retrieved (24494kB/49ms)[0m
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mLoading project definition from /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/sbt_6c5b0244/sanity/project[0m[0m
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mUpdating {file:/private/var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/sbt_6c5b0244/sanity/project/}sanity-build...[0m[0m
-[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mResolving com.rallyhealth#rally-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
+[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mResolving com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
-[0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving com.rallyhealth#rally-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
+[0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
 [0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving com.typesafe#sbt-mima-plugin;0.1.9 ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
@@ -151,8 +151,8 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m	sbt.plugins.CorePlugin: enabled in sanity[0m
 [0m[[0minfo[0m] [0m	sbt.plugins.JUnitXmlReportPlugin: enabled in sanity[0m
 [0m[[0minfo[0m] [0m	sbt.plugins.Giter8TemplatePlugin: enabled in sanity[0m
-[0m[[0minfo[0m] [0m	com.rallyhealth.semver.SemVerPlugin: enabled in sanity[0m
-[0m[[0minfo[0m] [0m	com.rallyhealth.versioning.GitVersioningPlugin: enabled in sanity[0m
+[0m[[0minfo[0m] [0m	com.rallyhealth.sbt.semver.SemVerPlugin: enabled in sanity[0m
+[0m[[0minfo[0m] [0m	com.rallyhealth.sbt.versioning.GitVersioningPlugin: enabled in sanity[0m
 [0m[[0minfo[0m] [0m	com.typesafe.tools.mima.plugin.MimaPlugin: enabled in sanity[0m
 [0m[[0minfo[0m] [0m[0m[[32msuccess[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:22 PM[0m[0m
 [0m[[0minfo[0m] [0m[0m[[32msuccess[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:22 PM[0m[0m
@@ -161,14 +161,14 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mUpdating {file:/private/var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/sbt_6c5b0244/sanity/}sanity...[0m[0m
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-library;2.11.8 ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
-[0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving com.rallyhealth#rally-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
+[0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
-[0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving com.rallyhealth#rally-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
-[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	module not found: com.rallyhealth#rally-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT[0m[0m
+[0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
+[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	module not found: com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m==== local: tried[0m[0m
-[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m  /Users/patrick.bohan/.ivy2/local/com.rallyhealth/rally-versioning/1.0.0-m1-4-bd0d236-dirty-SNAPSHOT/ivys/ivy.xml[0m[0m
+[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m  /Users/patrick.bohan/.ivy2/local/com.rallyhealth/sbt-git-versioning/1.0.0-m1-4-bd0d236-dirty-SNAPSHOT/ivys/ivy.xml[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m==== public: tried[0m[0m
-[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m  https://repo1.maven.org/maven2/com/rallyhealth/rally-versioning/1.0.0-m1-4-bd0d236-dirty-SNAPSHOT/rally-versioning-1.0.0-m1-4-bd0d236-dirty-SNAPSHOT.pom[0m[0m
+[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m  https://repo1.maven.org/maven2/com/rallyhealth/sbt-git-versioning/1.0.0-m1-4-bd0d236-dirty-SNAPSHOT/sbt-git-versioning-1.0.0-m1-4-bd0d236-dirty-SNAPSHOT.pom[0m[0m
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-compiler;2.11.8 ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
 [0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-reflect;2.11.8 ...[0m[0m
@@ -181,15 +181,15 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	::::::::::::::::::::::::::::::::::::::::::::::[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	::          UNRESOLVED DEPENDENCIES         ::[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	::::::::::::::::::::::::::::::::::::::::::::::[0m[0m
-[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	:: com.rallyhealth#rally-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT: not found[0m[0m
+[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	:: com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT: not found[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	::::::::::::::::::::::::::::::::::::::::::::::[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m	Note: Unresolved dependencies path:[0m[0m
-[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m		com.rallyhealth:rally-versioning:1.0.0-m1-4-bd0d236-dirty-SNAPSHOT (/private/var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/sbt_6c5b0244/sanity/build.sbt#L14-15)[0m[0m
+[0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m		com.rallyhealth:sbt-git-versioning:1.0.0-m1-4-bd0d236-dirty-SNAPSHOT (/private/var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/sbt_6c5b0244/sanity/build.sbt#L14-15)[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m		  +- com.rallyhealth.test.scripted:sanity_2.11:0.0.1[0m[0m
 [0m[[0minfo[0m] [0mjava.lang.IllegalArgumentException: 'semVerLimit' is not set in your 'build.sbt': 'semVerLimit' is a threshold version, it is a version you do NOT want to exceed with these changes. If non-empty the `semVerCheck` will ensure that your changes do not require a release EQUAL or GREATER than this version. (no default value)[0m
-[0m[[0minfo[0m] [0m	at com.rallyhealth.semver.SemVerPlugin$$anonfun$projectSettings$6.apply(SemVerPlugin.scala:82)[0m
-[0m[[0minfo[0m] [0m	at com.rallyhealth.semver.SemVerPlugin$$anonfun$projectSettings$6.apply(SemVerPlugin.scala:81)[0m
+[0m[[0minfo[0m] [0m	at com.rallyhealth.sbt.semver.SemVerPlugin$$anonfun$projectSettings$6.apply(SemVerPlugin.scala:82)[0m
+[0m[[0minfo[0m] [0m	at com.rallyhealth.sbt.semver.SemVerPlugin$$anonfun$projectSettings$6.apply(SemVerPlugin.scala:81)[0m
 [0m[[0minfo[0m] [0m	at sbt.std.Transform$$anon$3$$anonfun$apply$2.apply(System.scala:44)[0m
 [0m[[0minfo[0m] [0m	at sbt.std.Transform$$anon$3$$anonfun$apply$2.apply(System.scala:44)[0m
 [0m[[0minfo[0m] [0m	at sbt.std.Transform$$anon$4.work(System.scala:63)[0m
@@ -207,7 +207,7 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)[0m
 [0m[[0minfo[0m] [0m	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)[0m
 [0m[[0minfo[0m] [0m	at java.lang.Thread.run(Thread.java:745)[0m
-[0m[[0minfo[0m] [0msbt.ResolveException: unresolved dependency: com.rallyhealth#rally-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT: not found[0m
+[0m[[0minfo[0m] [0msbt.ResolveException: unresolved dependency: com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT: not found[0m
 [0m[[0minfo[0m] [0m	at sbt.IvyActions$.sbt$IvyActions$$resolve(IvyActions.scala:313)[0m
 [0m[[0minfo[0m] [0m	at sbt.IvyActions$$anonfun$updateEither$1.apply(IvyActions.scala:191)[0m
 [0m[[0minfo[0m] [0m	at sbt.IvyActions$$anonfun$updateEither$1.apply(IvyActions.scala:168)[0m
@@ -259,7 +259,7 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)[0m
 [0m[[0minfo[0m] [0m	at java.lang.Thread.run(Thread.java:745)[0m
 [0m[[0minfo[0m] [0m[0m[[31merror[0m] [0m({.}/*:[31msemVerLimit[0m) java.lang.IllegalArgumentException: 'semVerLimit' is not set in your 'build.sbt': 'semVerLimit' is a threshold version, it is a version you do NOT want to exceed with these changes. If non-empty the `semVerCheck` will ensure that your changes do not require a release EQUAL or GREATER than this version. (no default value)[0m[0m
-[0m[[0minfo[0m] [0m[0m[[31merror[0m] [0m(*:[31mupdate[0m) sbt.ResolveException: unresolved dependency: com.rallyhealth#rally-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT: not found[0m[0m
+[0m[[0minfo[0m] [0m[0m[[31merror[0m] [0m(*:[31mupdate[0m) sbt.ResolveException: unresolved dependency: com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT: not found[0m[0m
 [0m[[0minfo[0m] [0m[0m[[31merror[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:23 PM[0m[0m
 [0m[[0minfo[0m] [0mjava.lang.AssertionError: assertion failed: Could not find '[error]' in log:[0m
 [0m[[0minfo[0m] [0m    [250/259] [info] at sbt.Execute.work(Execute.scala:237)[0m
@@ -307,4 +307,4 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m[0m[[31merror[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:23 PM[0m[0m
 [0m[[31merror[0m] [0mx semver / sanity[0m
 [0m[[31merror[0m] [0m   {line 11}  Command failed: searchLog failed[0m
-[48;5;26m[38;5;235m SBT [49m[39m[48;5;214m[38;5;26m[49m[39m[48;5;214m[38;5;235m  addScriptedRallyVersioningTest_code2 [49m[39m[48;5;235m[38;5;214m[49m[39m[48;5;235m[38;5;250m rally-versioning [49m[39m[49m[38;5;235m[49m[39m[49m[39m [49m[39m[[Kscripted semver/sanity[22D[K
+[48;5;26m[38;5;235m SBT [49m[39m[48;5;214m[38;5;26m[49m[39m[48;5;214m[38;5;235m  addScriptedRallyVersioningTest_code2 [49m[39m[48;5;235m[38;5;214m[49m[39m[48;5;235m[38;5;250m sbt-git-versioning [49m[39m[49m[38;5;235m[49m[39m[49m[39m [49m[39m[[Kscripted semver/sanity[22D[K

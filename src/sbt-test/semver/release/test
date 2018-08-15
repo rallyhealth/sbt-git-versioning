@@ -1,0 +1,61 @@
+###########################################################################################################
+# Tests compatibility with the -Drelease=<major|minor|patch> arg.
+###########################################################################################################
+
+# Set up a git repo appease GitVersioningPlugin and tag first version.
+$ exec git init
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+$ exec git tag v1.0.1
+
+# Should pass because there's no previous version
+> semVerCheck
+
+# Publish the first version so that SemVer will have a baseline to compare to.
+> publishLocal
+
+# Introduce minor change.
+$ copy-file srcTemplates/minorChange/Thing.scala src/main/scala/Thing.scala
+$ exec git add .
+$ exec git commit -am 'Minor change'
+> reload
+
+# SemVer should pass. Minor changes are acceptable for SNAPSHOTs.
+> assertVersion 1.0.2-1-<hash>-SNAPSHOT
+> semVerCheck
+
+# Attempt an invalid patch RELEASE
+> setRelease patch
+> reload
+> assertVersion 1.0.2
+
+# SemVer should fail given because this is a patch RELEASE--not a SNAPSHOT.
+-> semVerCheck
+
+# Release minor version
+> setRelease minor
+> reload
+> assertVersion 1.1.0
+
+# All good now.
+> semVerCheck
+
+# Go ahead and release 0.1.0.
+> publishLocal
+$ exec git tag v1.1.0
+> clearRelease
+
+# Introduce major change.
+$ copy-file srcTemplates/majorChange/Thing.scala src/main/scala/Thing.scala
+$ exec git add .
+$ exec git commit -am 'Major change'
+> reload
+> assertVersion 1.1.1-1-<hash>-SNAPSHOT
+
+# SemVer should fail since major changes are not tolerable for SNAPSHOTs like minor changes are.
+-> semVerCheck
+
+> setRelease major
+> reload
+> assertVersion 2.0.0
+> semVerCheck

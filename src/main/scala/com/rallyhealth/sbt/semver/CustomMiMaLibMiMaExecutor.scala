@@ -1,17 +1,15 @@
 package com.rallyhealth.sbt.semver
 
-import com.rallyhealth.sbt.semver.CustomMiMaLibMiMaExecutor._
-import com.typesafe.tools.mima.core._
+import com.rallyhealth.sbt.semver.mima.MiMaExecutor
 import com.typesafe.tools.mima.core.util.IndentedOutput.indented
+import com.typesafe.tools.mima.core._
 import com.typesafe.tools.mima.lib.MiMaLib
 import com.typesafe.tools.mima.lib.analyze.Analyzer
 import com.typesafe.tools.mima.plugin.MimaKeys
 import sbt.{File => SbtFile}
 
 import scala.collection.mutable.ListBuffer
-import scala.reflect.io.{File => ReflectFile}
-import scala.tools.nsc.io.AbstractFile
-import scala.tools.nsc.util.{DirectoryClassPath, JavaClassPath}
+import scala.tools.nsc.io.{AbstractFile, File}
 
 /**
   * Custom re-implementation of [[MiMaLib]] that does not [[Config.fatal]] on an error.
@@ -25,9 +23,9 @@ import scala.tools.nsc.util.{DirectoryClassPath, JavaClassPath}
   *
   * Google produced only [[https://github.com/typesafehub/migration-manager/issues/55]] which wasn't very helpful.
   * Unfortunately I could not re-create this with a unit or scripted test either. I only replicated it in the wild.
-  * If I ran "sbt compile" it would just halt SBT trying to compile the root project. The path would not exist because
-  * the root is not a real project. That path comes from [[MimaKeys.mimaCurrentClassfiles]]. I do not know why it
-  * contains a non-existent path if the failure is so harsh.
+  * It would just halt SBT trying to compile the root project. The path wouldn't exist because the root is not a real
+  * project. That path comes from [[MimaKeys.mimaCurrentClassfiles]]. I do not know why it contains a non-existent path
+  * if the failure is so harsh.
   *
   * I copied the code from [[https://github.com/typesafehub/migration-manager/blob/master/reporter/src/main/scala/com/typesafe/tools/mima/lib/MiMaLib.scala]]
   * and modified it:
@@ -37,7 +35,7 @@ import scala.tools.nsc.util.{DirectoryClassPath, JavaClassPath}
   * - Clear list of problems before collecting (so we can re-use the logic).
   * - Less stringly-typed
   */
-class CustomMiMaLibMiMaExecutor(classpath: JavaClassPath) extends MiMaExecutor {
+class CustomMiMaLibMiMaExecutor(classpath: CompilerClassPath) extends MiMaExecutor {
 
   // Copied from com.typesafe.tools.mima.SbtMima.makeMima(). I have no idea what this does, but it is DEFINITELY
   // required. It sets up something with the logger. If you don't do this you get weird NullPointerExceptions when
@@ -48,11 +46,18 @@ class CustomMiMaLibMiMaExecutor(classpath: JavaClassPath) extends MiMaExecutor {
 
   override def forwardProblems(oldDir: SbtFile, newDir: SbtFile): List[Problem] = collectProblems(newDir, oldDir)
 
-  private def root(file: SbtFile): Definitions = classPath(file) match {
+  private def root(file: SbtFile): Definitions = classPath(file.getAbsolutePath) match {
     case cp @ Some(_) =>
       new Definitions(cp, classpath)
     case None =>
       throw new IllegalArgumentException("can only run MiMa on a directory or jar file: " + file.getAbsoluteFile)
+  }
+
+  private def classPath(name: String): Option[CompilerClassPath] = {
+    val f = new File(new java.io.File(name))
+    val dir = AbstractFile.getDirectory(f)
+    if (dir == null) None
+    else Some(dirClassPath(dir))
   }
 
   private val problems = new ListBuffer[Problem]
@@ -62,7 +67,6 @@ class CustomMiMaLibMiMaExecutor(classpath: JavaClassPath) extends MiMaExecutor {
   }
 
   private def comparePackages(oldPkg: PackageInfo, newPkg: PackageInfo): Unit = {
-    val traits = newPkg.traits // determine traits of new package first
     for (oldClazz <- oldPkg.accessibleClasses) {
       newPkg.classes get oldClazz.bytecodeName match {
         case None if oldClazz.isImplClass =>
@@ -98,18 +102,5 @@ class CustomMiMaLibMiMaExecutor(classpath: JavaClassPath) extends MiMaExecutor {
     val newRoot = root(newPath)
     traversePackages(oldRoot.targetPackage, newRoot.targetPackage)
     problems.toList
-  }
-}
-
-object CustomMiMaLibMiMaExecutor {
-
-  def classPath(file: SbtFile): Option[DirectoryClassPath] =
-    classPath(file.getAbsolutePath)
-
-  def classPath(name: String): Option[DirectoryClassPath] = {
-    val f = new ReflectFile(new java.io.File(name))
-    val dir = AbstractFile.getDirectory(f)
-    if (dir == null) None
-    else Some(new DirectoryClassPath(dir, DefaultJavaContext))
   }
 }

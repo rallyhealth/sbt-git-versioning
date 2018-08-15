@@ -4,35 +4,52 @@ name := "sbt-git-versioning"
 organizationName := "Rally Health"
 organization := "com.rallyhealth.sbt"
 
-enablePlugins(SemVerPlugin)
+// enable after SemVerPlugin supports sbt-plugins
+//enablePlugins(SemVerPlugin)
 semVerLimit := "1.0.999"
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 
 bintrayOrganization := Some("rallyhealth")
 bintrayRepository := "sbt-plugins"
 
+scalacOptions ++= {
+  val linting = CrossVersion.partialVersion(scalaVersion.value) match {
+    // some imports are necessary for compat with 2.10.
+    // 2.12 needs to chill out with the unused imports warnings.
+    case Some((2, 12)) => "-Xlint:-unused,_"
+    case _ => "-Xlint"
+  }
+  Seq("-Xfatal-warnings", linting)
+}
+
+// to default to sbt 1.0
+// sbtVersion in pluginCrossBuild := "1.1.6"
+// scalaVersion := "2.12.6"
+
+crossSbtVersions := List("0.13.17", "1.1.6")
+
+scalaCompilerBridgeSource := {
+  val sv = appConfiguration.value.provider.id.version
+  ("org.scala-sbt" % "compiler-interface" % sv % "component").sources
+}
+
 publishMavenStyle := false
 
 resolvers += Resolver.bintrayRepo("typesafe", "sbt-plugins")
 
-scalacOptions ++= Seq("-Xfatal-warnings", "-Xlint")
-
-val sbtMimaVersion = "0.1.13"
+val sbtMimaVersion = "0.1.18"
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.2.6" % Test,
-  // you need this dependency to depend on the real MiMa code (which lives as part of SBT, not the plugin JAR)
-  "com.typesafe" %% "mima-core" % sbtMimaVersion,
-  "com.typesafe" %% "mima-reporter" % sbtMimaVersion,
+  "org.scalatest" %% "scalatest" % "3.0.5" % Test,
   "se.sawano.java" % "alphanumeric-comparator" % "1.4.1"
 )
 
 // you need to enable the plugin HERE to depend on code in the plugin JAR. you can't add it as part of
 // libraryDependencies nor put it in plugins.sbt
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % sbtMimaVersion)
+addSbtPlugin("com.dwijnand" % "sbt-compat" % "1.2.6")
 
 // disable scaladoc generation
 sources in(Compile, doc) := Seq.empty
 
 publishArtifact in packageDoc := false
-

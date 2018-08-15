@@ -1,8 +1,7 @@
 /*
- * All of this comes from http://eed3si9n.com/testing-sbt-plugins, except using `GitVersioningScriptedPlugin`
+ * All of this comes from http://eed3si9n.com/testing-sbt-plugins
  */
-GitVersioningScriptedPlugin.scriptedSettings
-
+ScriptedPlugin.scriptedSettings
 /**
   * The scripted sbt projects also need to know any sbt opt overrides. For example:
   * - if the .ivy2 location is in another place

@@ -62,5 +62,5 @@ case class GitCommitWithCount(commit: GitCommit, count: Int) {
 
 object GitCommitWithCount {
 
-  def assertCount(commits: Int): Unit = require(commits >= 1, s"commits=$commits cannot be less than 0")
+  def assertCount(commits: Int): Unit = require(commits >= 0, s"commits=$commits cannot be less than 0")
 }

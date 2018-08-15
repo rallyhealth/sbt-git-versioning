@@ -4,8 +4,8 @@ import java.io.File
 
 import com.rallyhealth.sbt.versioning.GitDriverImplSpec.MockDriver
 import org.scalatest.FunSpec
-import sbt.Process
 
+import scala.sys.process._
 import scala.util.Random
 
 class GitDriverImplSpec extends FunSpec {
