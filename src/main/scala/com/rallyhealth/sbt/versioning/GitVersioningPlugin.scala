@@ -3,6 +3,7 @@ package com.rallyhealth.sbt.versioning
 import java.io.File
 
 import com.rallyhealth.sbt.versioning.GitFetcher.FetchResult
+import com.rallyhealth.sbt.versioning.LowerBoundedSemanticVersion._
 import sbt.Keys._
 import sbt._
 import sbt.complete.DefaultParsers._
@@ -67,11 +68,11 @@ object GitVersioningPlugin extends AutoPlugin {
       * }}}
       *
       * [[gitVersioningSnapshotLowerBound]] acts as a lower bound and has no effect
-      * when its value becomes less than [[versionFromGit]].
+      * when its value is less than [[versionFromGit]].
       *
       * [[gitVersioningSnapshotLowerBound]] has no effect when [[versionOverride]] is present.
       */
-    lazy val gitVersioningSnapshotLowerBound: SettingKey[Option[ReleaseVersion]] = settingKey[Option[ReleaseVersion]](
+    lazy val gitVersioningSnapshotLowerBound: SettingKey[Option[LowerBound]] = settingKey[Option[LowerBound]](
       "Produces snapshot versions whose major.minor.patch is at least this version."
     )
 
@@ -180,12 +181,21 @@ object GitVersioningPlugin extends AutoPlugin {
 
     version := {
       import SemVerReleaseType._
+      val log = ConsoleLogger() // A setting cannot depend on a task (like streams.value)
 
       // version must be semver, see version's definition
       val verOverride = versionOverride.value.map(
         SemanticVersion.fromString(_)
           .getOrElse(throw new IllegalArgumentException(s"cannot parse version=${versionOverride.value}"))
       )
+
+      gitVersioningMaybeRelease.value.foreach { release =>
+        log.info(s"GitVersioningPlugin set release=$release")
+      }
+
+      gitVersioningSnapshotLowerBound.value.foreach { bound =>
+        log.info(s"GitVersioningPlugin set gitVersioningSnapshotLowerBound=$bound")
+      }
 
       lazy val boundedVersionFromGit: SemanticVersion = {
         // 1. Start with version from git.
@@ -204,7 +214,7 @@ object GitVersioningPlugin extends AutoPlugin {
       }
 
       val version = verOverride.getOrElse(boundedVersionFromGit).toString
-      ConsoleLogger().info(s"GitVersioningPlugin set version=$version")
+      log.info(s"GitVersioningPlugin set version=$version")
       version
     },
 
@@ -235,49 +245,5 @@ object GitVersioningPlugin extends AutoPlugin {
 
     commands ++= Seq(printVersionCommand, writeVersionCommand)
   )
-
-  implicit class BoundedSemanticVersion(val version: SemanticVersion) extends AnyVal {
-
-    /**
-      * A new [[SemanticVersion]] increased up to the provided lower bound or else the original [[version]].
-      *
-      * @param branchState Used to fill in the hash and commit count if this returns a new [[SemanticVersion]]
-      * @return A new [[SemanticVersion]] increased up to the provided lower bound, or else the original [[version]].
-      */
-    def lowerBound(bound: ReleaseVersion, branchState: GitBranchState): SemanticVersion = {
-      if (bound <= version) return version
-
-      version match {
-        case r: ReleaseVersion =>
-          // unfortunately BranchState makes this more complex -- we create SnapshotVersions if we have a
-          // GitCommitWithCount, and a ReleaseVersion if we have a GitCommit
-          branchState match {
-            case GitBranchStateTwoReleases(head, _, _, _) => fromCommit(bound, head)
-            case GitBranchStateOneReleaseNotHead(head, _, _) => fromCommit(bound, head)
-            case GitBranchStateOneReleaseHead(head, _) => fromCommit(bound, head)
-            case GitBranchStateNoReleases(head) => fromCommit(bound, head)
-            case GitBranchStateNoCommits => bound
-          }
-
-        case s: SnapshotVersion =>
-          s.copy(bound.major, bound.minor, bound.patch, bound.versionIdentifiers)
-      }
-    }
-
-    private def fromCommit(bound: ReleaseVersion, commit: GitCommit): ReleaseVersion = {
-      bound.copy(isDirty = version.isDirty)
-    }
-
-    private def fromCommit(bound: ReleaseVersion, commit: GitCommitWithCount): SemanticVersion = {
-      SnapshotVersion(
-        bound.major,
-        bound.minor,
-        bound.patch,
-        bound.versionIdentifiers,
-        version.isDirty,
-        HashSemVerIdentifier(commit.commit.abbreviatedHash),
-        CommitsSemVerIdentifier(commit.count))
-    }
-  }
 
 }

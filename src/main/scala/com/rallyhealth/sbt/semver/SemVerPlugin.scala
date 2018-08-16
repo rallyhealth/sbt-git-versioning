@@ -1,9 +1,14 @@
 package com.rallyhealth.sbt.semver
 
-import com.typesafe.tools.mima.plugin.MimaPlugin
+import com.rallyhealth.sbt.semver.level._
+import com.rallyhealth.sbt.semver.level.rule._
+import com.rallyhealth.sbt.semver.mima._
+import com.rallyhealth.sbt.versioning.{ReleaseVersion, SemVerReleaseType, SemanticVersion}
 import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
+import com.typesafe.tools.mima.plugin.{MimaKeys, MimaPlugin}
 import sbt.Keys._
 import sbt._
+import sbt.compat._
 import sbt.plugins.JvmPlugin
 
 /**
@@ -50,11 +55,6 @@ object SemVerPlugin extends AutoPlugin {
         " Release version. This flag is necessary only in rare cases -- usually when you need to add a new artifact " +
         " where one did not exist previous. (default=None)")
 
-    // See http://semver.org/#spec-item-4
-    lazy val semVerPreRelease: SettingKey[Boolean] = settingKey[Boolean](
-      "'semVerPreRelease' will run `semVerCheck` for pre-release versions (e.g. 0.0.1 or 0.1.0)" +
-        " if set to true. See http://semver.org/#spec-item-4. (default=false)")
-
     lazy val semVerCheck: TaskKey[Unit] = taskKey[Unit](
       "'semVerCheck' manually checks SemVer on this project (ignores 'semVerPreRelease')")
 
@@ -67,6 +67,9 @@ object SemVerPlugin extends AutoPlugin {
     lazy val semVerCheckOnPublish: SettingKey[Boolean] = settingKey[Boolean](
       "'semVerCheckOnPublish' enables checking SemVer on the 'publish' task. (default=true)")
 
+    lazy val semVerEnforcementLevelRules: TaskKey[Seq[SemVerLevelRule]] = taskKey[Seq[SemVerLevelRule]]("Defines the level of acceptable changes that should be enforced.")
+    lazy val semVerEnforcementLevel: TaskKey[SemVerReleaseType] = taskKey[SemVerReleaseType]("The level of acceptable changes.")
+    lazy val semVerCheckValidVersion: TaskKey[Unit] = taskKey[Unit]("Checks that the version is valid")
     // This Plugin does not directly support problem filters that are in MiMa, see "problemFilter" field in
     // https://github.com/typesafehub/migration-manager/blob/master/reporter/src/main/scala/com/typesafe/tools/mima/cli/Main.scala
     // Currently all the Problem analyzers are useful so at the time of writing we had no need for filtering
@@ -74,30 +77,28 @@ object SemVerPlugin extends AutoPlugin {
 
   import autoImport._
 
+  lazy val semVerVersion: SettingKey[SemanticVersion] = settingKey[SemanticVersion](
+    "'version' settingKey parsed as a SemanticVersion."
+  )
+
+  private[semver] object MiMa {
+
+    lazy val miMaChecker: TaskKey[MimaChecker] = taskKey[MimaChecker]("Thin wrapper around typesafe's Migration Manager.")
+    lazy val maybePrevRelease: TaskKey[Option[ReleaseVersion]] = taskKey[Option[ReleaseVersion]]("A previous release for MiMa to compare against, if any.")
+    lazy val maybePrevInput: TaskKey[Option[MiMaInput]] = taskKey[Option[MiMaInput]]("The previous artifact for MiMa to compare against, if any.")
+    lazy val moduleResolver: TaskKey[ModuleResolver] = taskKey[ModuleResolver]("Resolves/Downloads an artifact, returning the location on the filesystem.")
+  }
+
   override def buildSettings: Seq[Setting[_]] = Seq(
     // we do not want MiMa controlling failure
     mimaFailOnProblem := false,
 
-    semVerPreRelease := false,
-
     semVerEnforceAfterVersion := None,
 
-    /**
-      * If you don't provide this a value you get a rather generic error as soon as you run SBT:
-      * {{{
-      * References to undefined settings:
-      *   :semVerLimit from *:test ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
-      *   :semVerLimit from *:publishLocal ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
-      *   :semVerLimit from *:compile ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
-      *   :semVerLimit from *:semVerCheck ((com.rallyhealth.sbt.semver.SemVerPlugin) SemVerPlugin.scala:NNN)
-      * }}}
-      * I think a clear error message that allows you to load SBT an fail when you run the task is a better choice.
-      */
-    semVerLimit := {
-      throw new IllegalArgumentException(
-        s"${SemVerPluginUtils.ConfigErrorPrefix} 'semVerLimit' is not set in your 'build.sbt'"
-      )
-    }
+    semVerVersion := SemanticVersion.fromString(version.value).getOrElse(
+      throw new IllegalArgumentException(s"version=${version.value} is not a valid SemVer")),
+
+    semVerLimit := "deprecated"
   )
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
@@ -108,7 +109,24 @@ object SemVerPlugin extends AutoPlugin {
 
     semVerCheckOnPublish := true,
 
-    semVerCheck := SemVerPluginUtils.semVerCheck.value,
+    semVerCheck := {
+      SemVerMiMaTasks.semVerCheckMiMa
+        .dependsOn(semVerCheckValidVersion).value
+    },
+
+    semVerCheck := {
+      // Wrap the real implementation with a deprecation check.
+      val log = streams.value.log
+      if (semVerLimit.value != "deprecated") {
+        log.warn(
+          """'semVerLimit' is DEPRECATED and will be ignored.
+            |
+            |If you want to raise the version prior to a release, instead use:
+            |gitVersioningSnapshotLowerBound := "x.y.z"""".stripMargin
+        )
+      }
+      semVerCheck.value
+    },
 
     /*
      * WARNING to anyone who might think "This doesn't need Def.taskDyn {}" YES IT DOES -- I've written this at least a
@@ -160,6 +178,47 @@ object SemVerPlugin extends AutoPlugin {
     publishLocal := {
       // ensure that SemVer checking happens BEFORE publishing by using dependsOn()
       publishLocal.dependsOn(createSemVerTaskOnPublish()).value
+    },
+
+    semVerEnforcementLevelRules := {
+      val current: SemanticVersion = semVerVersion.value
+
+      Seq(
+        InitialDevelopmentRule(current),
+        EnforceAfterVersionRule(current, semVerEnforceAfterVersion.value.map(ReleaseVersion.parseAsCleanOrThrow)),
+        VersionDiffRule(current, MiMa.maybePrevRelease.value)
+      )
+    },
+
+    semVerEnforcementLevel := {
+      semVerEnforcementLevelRules.value.view.flatMap(_.calcLevel()).head.releaseType
+    },
+
+    MiMa.miMaChecker := {
+      val classpath = (fullClasspath in MimaKeys.mimaFindBinaryIssues).value
+      new MimaChecker(MiMaExecutor(classpath, streams.value))
+    },
+
+    MiMa.moduleResolver := new IvyModuleResolver(scalaModuleInfo.value, ivySbt.value, streams.value),
+
+    MiMa.maybePrevRelease := SemVerTasks.prevRelease.value,
+
+    MiMa.maybePrevInput := {
+      val mimaModuleResolver = MiMa.moduleResolver.value
+
+      MiMa.maybePrevRelease.value.map { relVer =>
+        val moduleID = organization.value %% name.value % relVer.toString
+        val file = mimaModuleResolver.resolve(moduleID)
+        MiMaInput(file, relVer)
+      }
+    },
+    semVerCheckValidVersion := {
+      SemVerPlugin
+      MiMa.maybePrevRelease.value.foreach { prev =>
+        if (semVerVersion.value <= prev) {
+          throw new VersionDowngradeException(semVerVersion.value, prev)
+        }
+      }
     }
   )
 

@@ -5,87 +5,59 @@
 $ exec git init
 $ exec git add .
 $ exec git commit -am 'Initial commit.'
+> reload
 
-# Tag it -> clean Release
+# One commit. No tags.
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "0.0.0"'
+> assertVersion 0.0.1-1-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
+> assertVersion 0.0.1-1-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "0.0.2"'
+> assertVersion 0.0.2-1-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "0.1.0"'
+> assertVersion 0.1.0-1-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
+> assertVersion 1.0.0-1-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
+> assertVersion 2.2.2-1-<hash>-SNAPSHOT
+
+# Tag it.
 $ exec git tag v1.0.0
-> reload
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
 > assertVersion 1.0.0
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
-> assertVersion 1.0.0
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
-> assertVersion 1.0.1
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
-> assertVersion 1.2.0
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
-> assertVersion 2.2.2
 
-# New untracked, 0 commits past tag -> clean Release
-$ touch dirty-0-commits.txt
-> reload
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
 > assertVersion 1.0.0
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
-> assertVersion 1.0.0
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
-> assertVersion 1.0.1
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
-> assertVersion 1.2.0
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
-> assertVersion 2.2.2
 
-# New tracked, 0 commits past tag -> dirty SNAPSHOT without hash
-$ exec git add dirty-0-commits.txt
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
+> assertVersion 1.0.1-0-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
+> assertVersion 1.2.0-0-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
+> assertVersion 2.2.2-0-<hash>-SNAPSHOT
+
+$ touch dirty.txt
+$ exec git add dirty.txt
 > reload
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
 > assertVersion 1.0.0-dirty-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
 > assertVersion 1.0.0-dirty-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
-> assertVersion 1.0.1-dirty-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
-> assertVersion 1.2.0-dirty-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
-> assertVersion 2.2.2-dirty-SNAPSHOT
 
-# Committed -> clean SNAPSHOT with hash
-$ exec git commit -m "Added dirty-0-commits.txt"
-> reload
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
-> assertVersion 1.0.1-1-<hash>-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
-> assertVersion 1.0.1-1-<hash>-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
-> assertVersion 1.0.1-1-<hash>-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
-> assertVersion 1.2.0-1-<hash>-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
-> assertVersion 2.2.2-1-<hash>-SNAPSHOT
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
+> assertVersion 1.0.1-0-<hash>-dirty-SNAPSHOT
 
-# New tracked, 1 commits past tag -> dirty SNAPSHOT with hash
-$ touch dirty-1-commits.txt
-> reload
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
-> assertVersion 1.0.1-1-<hash>-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
-> assertVersion 1.0.1-1-<hash>-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
-> assertVersion 1.0.1-1-<hash>-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
-> assertVersion 1.2.0-1-<hash>-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
-> assertVersion 2.2.2-1-<hash>-SNAPSHOT
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
+> assertVersion 1.2.0-0-<hash>-dirty-SNAPSHOT
 
-# New tracked, 1 commits past tag -> dirty SNAPSHOT with hash
-$ exec git add dirty-1-commits.txt
-> reload
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
-> assertVersion 1.0.1-1-<hash>-dirty-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
-> assertVersion 1.0.1-1-<hash>-dirty-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
-> assertVersion 1.0.1-1-<hash>-dirty-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
-> assertVersion 1.2.0-1-<hash>-dirty-SNAPSHOT
-> 'set rallyVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
-> assertVersion 2.2.2-1-<hash>-dirty-SNAPSHOT
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
+> assertVersion 2.2.2-0-<hash>-dirty-SNAPSHOT

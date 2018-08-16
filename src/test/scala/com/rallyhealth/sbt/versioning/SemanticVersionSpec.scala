@@ -3,12 +3,13 @@ package com.rallyhealth.sbt.versioning
 import com.rallyhealth.sbt.util.NullSbtLogger
 import com.rallyhealth.sbt.versioning.SemanticVersion._
 import org.scalatest.FunSpec
+import sbt.util.Logger
 
 import scala.util.Random
 
 class SemanticVersionSpec extends FunSpec {
 
-  implicit val logger = NullSbtLogger
+  implicit val logger: Logger = NullSbtLogger
 
   describe("ReleaseVersion") {
 

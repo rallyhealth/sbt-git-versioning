@@ -23,9 +23,4 @@ lazy val root = (project in file("."))
 
 lazy val disabled = project
 
-lazy val enabled = project
-  .enablePlugins(SemVerPlugin)
-  .settings(
-    semVerPreRelease := true,
-    semVerLimit := "1.999.0"
-  )
+lazy val enabled = project.enablePlugins(SemVerPlugin)

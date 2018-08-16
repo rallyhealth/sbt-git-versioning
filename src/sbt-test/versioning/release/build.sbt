@@ -2,7 +2,7 @@ import sbt.complete.DefaultParsers._
 
 organization := "com.rallyhealth.test.scripted"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.12"
 
 scalacOptions ++= Seq("-Xfatal-warnings", "-Xlint")
 

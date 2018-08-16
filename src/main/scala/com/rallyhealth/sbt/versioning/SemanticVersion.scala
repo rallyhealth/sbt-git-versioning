@@ -1,7 +1,5 @@
 package com.rallyhealth.sbt.versioning
 
-import com.rallyhealth.sbt.semver.SemVerPluginUtils
-
 import scala.util.matching.Regex
 
 /**
@@ -74,10 +72,10 @@ sealed trait SemanticVersion extends Ordered[SemanticVersion] {
   def setDirty(value: Boolean): SemanticVersion
 
   /**
-    * True if this is a pre-release versions -- the major version is 0, e.g. 0.0.1 or 0.1.0. See
-    * [[http://semver.org/#spec-item-4]] and [[SemVerPluginUtils.semVerCheck()]]
+    * True if this is a initial development version -- the major version is 0, e.g. 0.0.1 or 0.1.0.
+    * @see http://semver.org/#spec-item-4
     */
-  def isPreRelease: Boolean = major == 0
+  def isInitialDevVersion: Boolean = major == 0
 
   /**
     * @return the current major, minor, patch, identifiers, and dirty status as a release version.
@@ -145,7 +143,7 @@ object SemanticVersion {
   * @param isDirty if True the [[SemVerIdentifierList]]s will contain [[StringSemVerIdentifier.dirty]]
   */
 case class ReleaseVersion(
-  major: Int, minor: Int, patch: Int, versionIdentifiers: SemVerIdentifierList, isDirty: Boolean)
+  major: Int, minor: Int, patch: Int, versionIdentifiers: SemVerIdentifierList = SemVerIdentifierList.empty, isDirty: Boolean = false)
   extends SemanticVersion {
 
   override val identifiers: SemVerIdentifierList = {
@@ -189,6 +187,13 @@ object ReleaseVersion {
 
   def unapply(string: String): Option[ReleaseVersion] =
     SemanticVersion.fromString(string).collect { case v: ReleaseVersion => v }
+
+  def parseAsCleanOrThrow(value: String): ReleaseVersion = {
+    unapply(value)
+      .filter(!_.isDirty)
+      .getOrElse(
+        throw new IllegalArgumentException(s"[SemVer] Config problem: cannot parse value=$value as clean release version"))
+  }
 
   /**
     * This returns the [[ReleaseVersion]] from the first [[GitCommit.tags]], using [[unapply()]], if such a tag

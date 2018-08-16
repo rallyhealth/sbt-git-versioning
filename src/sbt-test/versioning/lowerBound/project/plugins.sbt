@@ -5,5 +5,5 @@
       """|The system property 'plugin.version' is not defined.
         |Specify this property using the scriptedLaunchOpts -D.""".stripMargin
     )
-  else addSbtPlugin("com.rallyhealth" % "rally-versioning" % pluginVersion)
+  else addSbtPlugin("com.rallyhealth.sbt" % "sbt-git-versioning" % pluginVersion)
 }
