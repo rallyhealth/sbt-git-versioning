@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import com.rallyhealth.sbt.util.NullSbtLogger
 import org.scalatest.FunSuite
-import sbt.util.Logger
+import sbt.Logger
 
 import scala.concurrent.duration.Duration
 

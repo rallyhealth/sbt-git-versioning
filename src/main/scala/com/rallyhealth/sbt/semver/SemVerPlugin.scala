@@ -8,7 +8,7 @@ import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
 import com.typesafe.tools.mima.plugin.{MimaKeys, MimaPlugin}
 import sbt.Keys._
 import sbt._
-import sbt.compat._
+import sbt.compat._  // Required import for sbt 0.13.x support
 import sbt.plugins.JvmPlugin
 
 /**
@@ -213,7 +213,6 @@ object SemVerPlugin extends AutoPlugin {
       }
     },
     semVerCheckValidVersion := {
-      SemVerPlugin
       MiMa.maybePrevRelease.value.foreach { prev =>
         if (semVerVersion.value <= prev) {
           throw new VersionDowngradeException(semVerVersion.value, prev)

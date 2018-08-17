@@ -57,8 +57,8 @@ object GitVersioningPlugin extends AutoPlugin {
       * For example, given a most recent tag of v1.5.0, [[GitVersioningPlugin]] at CI time
       * will determine the version to be something like v1.5.1-4-aabcdef-SNAPSHOT.
       *
-      * If we have checks (MiMa, SemVerPlugin, RallyShadingPlugin) that enforce that
-      * no major changes are introduced, without correctly versioning as v2.0.0, the build would fail.
+      * If we have checks (MiMa, SemVerPlugin, ShadingPlugin) that enforce that no major changes are introduced,
+      * without correctly versioning as v2.0.0-whatever-SNAPSHOT, then the build would fail, incorrectly.
       *
       * [[gitVersioningSnapshotLowerBound]] offers a way to nudge the candidate version
       * up to v2.0.0-4-aabcdef-SNAPSHOT without tagging:
@@ -104,13 +104,13 @@ object GitVersioningPlugin extends AutoPlugin {
   import autoImport._
 
   // These Commands are necessary to prevent the taskKey from being run in EVERY project of multi-project builds.
-  lazy val printVersionCommand: Command = Command.command("printVersion") { (state: State) =>
+  lazy val printVersionCommand: Command = Command.command("printVersion") { state =>
     val e = Project.extract(state)
     val (newState, _) = e.runTask(printVersion, state)
     newState
   }
 
-  lazy val writeVersionCommand: Command = Command.single("writeVersion") { (state: State, args: String) =>
+  lazy val writeVersionCommand: Command = Command.single("writeVersion") { (state, args) =>
     val e = Project.extract(state)
     val (newState, _) = e.runInputTask(writeVersion, args, state)
     newState
@@ -135,7 +135,7 @@ object GitVersioningPlugin extends AutoPlugin {
     autoFetchTimeout := 15, // seconds
 
     autoFetchResult := {
-      implicit val logger = ConsoleLogger()
+      implicit val logger: Logger = ConsoleLogger()
       if (autoFetch.value) {
         logger.info("Fetching the most up-to-date tags from git remotes")
         GitFetcher.fetchRemotes(autoFetchRemotes.value, autoFetchTimeout.value.seconds)

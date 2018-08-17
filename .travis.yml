@@ -5,4 +5,4 @@ scala:
 jdk:
   - openjdk8
 script:
-  - sbt +test +scripted
+  - sbt ^test ^scripted

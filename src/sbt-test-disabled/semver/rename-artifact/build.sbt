@@ -14,7 +14,7 @@ semVerPreRelease := true
 
 name := "old-and-busted"
 
-val utils = com.rallyhealth.sbt.scripted.ScriptedUtils
+val utils = com.rallyhealth.scripted.ScriptedUtils
 
 initialize := {
   utils.initialize()

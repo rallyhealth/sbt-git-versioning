@@ -1,7 +1,6 @@
 /*
  * All of this comes from http://eed3si9n.com/testing-sbt-plugins
  */
-ScriptedPlugin.scriptedSettings
 /**
   * The scripted sbt projects also need to know any sbt opt overrides. For example:
   * - if the .ivy2 location is in another place
@@ -21,3 +20,4 @@ scriptedLaunchOpts := {
 }
 
 javaOptsDebugger := "-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n"
+scriptedBufferLog := false

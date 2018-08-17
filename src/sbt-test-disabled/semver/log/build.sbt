@@ -18,7 +18,7 @@ logLevel := sbt.Level.Info
 
 enablePlugins(SemVerPlugin)
 
-val utils = com.rallyhealth.sbt.scripted.ScriptedUtils
+val utils = com.rallyhealth.scripted.ScriptedUtils
 
 initialize := {
   utils.initialize()

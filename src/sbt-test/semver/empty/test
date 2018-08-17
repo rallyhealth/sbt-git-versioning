@@ -1,0 +1,34 @@
+###########################################################################################################
+# Uses "tag then publish" workflow.
+###########################################################################################################
+
+# Set up a git repo appease GitVersioningPlugin and tag first version.
+$ exec git init
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+$ exec git tag v1.0.0
+
+# Should pass because there's no previous version
+> semVerCheck
+
+# Publish the first version so that SemVer will have a baseline to compare to.
+> publishLocal
+
+# Introduce unrelated change to create a dummy commit
+$ exec touch dummy.txt
+$ exec git add .
+$ exec git commit -am 'Dummy commit'
+
+# Reload to pick up new version change.
+> reload
+
+# Running semver against the minor addition should pass since IT'S A SNAPSHOT
+> semVerCheck
+
+# Release the minor version.
+$ exec git tag v1.1.0
+# Version change. Reload.
+> reload
+
+# Still good.
+> semVerCheck

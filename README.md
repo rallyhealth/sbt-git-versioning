@@ -7,7 +7,7 @@ There are two sbt plugins in this one plugin library:
 
 # Compatibility
 
-Tested and supported for sbt version 0.13.x and above.
+Tested and supported for sbt versions: 0.13.17, 1.1.6, and 1.2.1
 
 # Install
 
@@ -24,11 +24,16 @@ In either case, you should now be able to add the plugin dependency to `project/
 ```scala
   addSbtPlugin("com.rallyhealth.sbt" % "sbt-git-versioning" % "x.y.z")
 ```
-3. Enable the plugin.
+3. Enable the SemVer plugin to enforce SemVer with MiMa. (Important for shared libraries, not so much for personal apps)
 
 ```scala
 val example = project
   .enablePlugins(SemVerPlugin)
+```
+4. Add a `gitVersioningSnapshotLowerBound` placeholder in build.sbt.
+```sbt
+// Uncomment when you're ready to start building 1.0.0-...-SNAPSHOT versions.
+// gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"
 ```
 
 # GitVersioningPlugin
@@ -40,9 +45,7 @@ previous tags) and the state of the working directly. Read on for the exact deta
 ## Usage
 
 This plugin will automatically determine and set the `version` setting on startup. There is nothing developers need to
-explicitly do. You can use `sbt publishLocal` to create a local snapshot artifact or, if you have a snapshot repository,
-you can `sbt publish` at the end of a continuous integration pipeline that is triggered on pull requests, so that you
-can easily pull one snapshot into another for testing.
+explicitly do. You can `publishLocal` and PRs and use the created snapshot artifacts anywhere you would a release artifact.
 
 You will see additional log statements like:
 ```
@@ -149,6 +152,7 @@ ensure that any git plugins are configured to not use shallow clones.
 ## Creating a Release
 
 ### Recommended: -Drelease
+
 Creating a release is done by passing a [release arg](#release-arg-property).
 ```
 sbt -Drelease=patch publish[Local]
@@ -166,6 +170,7 @@ git push origin "v${VERSION}"
 ```
 
 ### Possible: tag + sbt-git-versioning
+
 ...or by tagging and then publishing a release...
  ```
 git tag v1.2.3
@@ -173,6 +178,7 @@ sbt publish[Local]
 ```
 
 ### Not recommended (unless have good reasons): version.override
+
 ...or by overriding the version that will be applied to a specific build, using the
 `version.override` setting. Typically this is done by at the command line to avoid changing `build.sbt`.
 ```
@@ -203,120 +209,18 @@ You can run the check manually using `semVerCheck`. The check and also be run au
 * *Publish* - If `semVerCheckOnPublish` is set to true (the default) it will check **before** you publish
 * *PublishLocal* - If `semVerCheckOnPublish` is set to true (the default) it will check **before** you publishLocal
 
-The output will look like this:
-```
-[info] [SemVer] Checking ENABLED with LIMIT target semVerLimit=3.0.0
-[info] [SemVer] Check starting (prev=2.0.0 vs curr=3.0.0) ...
-[warn] [SemVer] Errors total=4, backward=0, forward=4, required diffType=minor
-[warn] [SemVer] (1/4) Forward -> method calamity()Double in class com.rallyhealth.sbt.semver.Equestria does not have a correspondent in previous version
-[warn] [SemVer] (2/4) Forward -> method princessLuna()Double in class com.rallyhealth.sbt.semver.Equestria does not have a correspondent in previous version
-[warn] [SemVer] (3/4) Forward -> method starlightGlimmer()Double in class com.rallyhealth.sbt.semver.Equestria does not have a correspondent in previous version
-[warn] [SemVer] (4/4) Forward -> method velvetRemedy()Double in class com.rallyhealth.sbt.semver.Equestria does not have a correspondent in previous version
-[warn] [SemVer] version=3.0.0 PASSED: required diffType=Minor achieved
-[success] Total time: 2 s, completed Nov 15, 2016 3:38:48 PM
-```
-
 When the SemVerPlugin halts the build it will look like:
 ```
-[info] [SemVer] Checking ENABLED with LIMIT target semVerLimit=2.0.1
-[info] [SemVer] Check starting (prev=2.0.0 vs curr=2.0.1) ...
-[error] [SemVer] Errors total=4, backward=0, forward=4, required diffType=minor
-[error] [SemVer] (1/4) Forward -> method calamity()Double in class com.rallyhealth.sbt.semver.Equestria does not have a correspondent in previous version
-[error] [SemVer] (2/4) Forward -> method princessLuna()Double in class com.rallyhealth.sbt.semver.Equestria does not have a correspondent in previous version
-[error] [SemVer] (3/4) Forward -> method starlightGlimmer()Double in class com.rallyhealth.sbt.semver.Equestria does not have a correspondent in previous version
-[error] [SemVer] (4/4) Forward -> method velvetRemedy()Double in class com.rallyhealth.sbt.semver.Equestria does not have a correspondent in previous version
-[error] [SemVer] version=2.0.1 FAILED: required diffType=minor NOT achieved
-java.lang.IllegalStateException: Proposed RELEASE version=2.0.1 FAILED SemVer rules, failing build
-	at com.rallyhealth.sbt.semver.SemVerHalter.haltBuild(SemVerHalter.scala:86)
-    ...
-[error] (*:compile) java.lang.IllegalStateException: Proposed RELEASE version=2.0.1 FAILED SemVer rules, failing build
-[error] Total time: 2 s, completed Nov 15, 2016 3:27:36 PM
+[error] (api/*:semVerCheck) com.rallyhealth.sbt.semver.SemVerVersionTooLowException: Your changes have new functionality and binary incompatibilites which violates the http://semver.org rules for a Minor release.
+[error]
+[error] Specifically, MiMa detected the following binary incompatibilities:
+[error] (1/1) Backward -> method url(java.lang.String)com.rallyhealth.rq.v1.RqRequest in object com.rallyhealth.rq.v1.Rq does not have a correspondent in current version
+[error]
+[error] These changes would require a Major release instead (1.9.0 => 2.0.0).
+[error] You can adjust the version by adding the following setting:
+[error]   gitVersioningSnapshotLowerBound in ThisBuild := "2.0.0"
+[error] Total time: 0 s, completed Jul 13, 2018 3:49:57 PM
 ```
-
-### semVerLimit
-
-`semVerLimit` is a version (e.g. "1.2.3") that tells SemVerPlugin when to halt the build. It prevents you from making any
-compatibility changes that would *exceed* that version.
-
-Defaults:
-- Release builds - same as version (version=1.2.3, semVerLimit=1.2.3).
-- Snapshot builds - set to highest version before next major release (version=1.2.3-SNAPSHOT, semVerLimit=1.999.999).
-
-You may explicitly set `semVerLimit` to alter this behavior.
-
-#### Examples
-
-This is best explained with an example. Let's assume the latest tag is `1.2.3`:
-
-* `semVerLimit := 1.2.3` - you won't be able to make *any* changes
-* `semVerLimit := 1.2.**999**` - you will be allowed to make *patch* changes.
-* `semVerLimit := 1.**999.999**` - you will be allowed to make *minor or patch* changes. (This is the default value.)
-* `semVerLimit := ""` - you will be allowed to make *major, minor, or patch* changes (`semVerLimit` is disabled)
-
-Here are a few stories to illustrate how `semVerLimit` works.
-
-#### Patch Change
-
-1. Version is `1.2.3` and `semVerLimit := 1.9.9`:
-2. Fluttershy needs to fix a bug (patch change).
-3. Fluttershy fixes, sees no backward or forward errors from SemVerPlugin.
-4. Fluttershy commits, PRs, and merges.
-5. Fluttershy successfully runs the release job for `1.2.4`.
-
-#### Minor Change (with a human error)
-
-1. Version is `1.2.4` (from above) and `semVerLimit := 1.9.9` (the default value):
-2. Applejack wants to add a new method (minor change).
-3. Applejack adds the new method, commits, PRs, and merges.
-4. Applejack runs the release job for `1.2.4` but the release job fails.
-5. SemVerPlugin's errors in the logs say that she needs to make a `minor` release (e.g. `1.3.0`).
-6. Applejack successfully runs the release job for `1.3.0`.
-
-#### A 'Big' Patch Change
-
-1. Version is `1.3.0` (from above) and `semVerLimit := 1.9.9` (the default value):
-2. Twilight Sparkle found a potential bug for an edge case, e.g. some
-'undefined' behavior. She only needs to make a *patch* change, but
-someone could be relying on that 'undefined' behavior, she wants to release
-a *minor* change
-3. Twilight Sparkle fixes, sees no backward or forward errors from SemVerPlugin.
-4. Twilight Sparkle commits, PRs, and merges.
-5. Twilight Sparkle successfully runs the release job for `1.**4**.0` (*minor*
-change even though only *patch* was required)
-
-#### Hot Fix (patch change)
-
-1. Version is `1.4.0` (from above) and `semVerLimit := 1.9.9` (the default value):
-2. Rainbow Dash needs to make a hot fix.
-3. Rainbow Dash changes `semVerLimit := 1.4.1` so she's absolutely sure no minor changes sneak in.
-4. Rainbow Dash makes her fix, commits, PRs, and merges
-5. Rainbow Dash successfully runs the release job for `1.4.1`.
-6. *Unfortunately the next committer will need to reset `semVerLimit := 1.9.9`*
-7. Rainbow Dash helpfully merges a PR to revert `semVerLimit := 1.9.9`
-
-#### Hot Fix Redux (patch change)
-
-1. Version is `1.4.1` (from above) and `semVerLimit := 1.9.9` (the default value):
-2. Pinkie Pie needs to make another hot fix.
-3. Pinkie Pie does not want to do a clean up commit like Rainbow Dash.
-4. Pinkie Pie runs SBT and executes ```> set semVerLimit := 1.4.2``` before any other command.
-5. Pinkie Pie makes her fix, commits, PRs
-6. Pinkie Pie successfully runs the release job for `1.4.2`.
-
-#### Major Change
-
-1. Version is `1.4.2` (from above) and `semVerLimit := 1.9.9` (the default value):
-2. Rarity wants to make a major breaking API change.
-3. Rarity changes `gitVersioningSnapshotLowerBound := 2.0.0` which automatically raises default `semVerLimit := 2.9.9`.
-4. Rarity makes her API change, commits, PRs, and merges.
-5. Rarity successfully runs the release job for `2.0.0`.
-
-#### What should you choose for `semVerLimit`?
-
-* First, talk to the team working on the service, or the users of the library. What do they want?
-* If you want to allow any backward compatible changes might choose the default limit (e.g. `semVerLimit := 1.999.999`).
-* If you want to avoid changes you might choose a limit like `semVerLimit := 1.0.999`
-* If you don't care about *any* changes you can disable the limt using `semVerLimit := ""`.
 
 ## Information
 
@@ -331,4 +235,4 @@ Then it uses that artifact as the baseline and compares against your changes.
 * When adding a new sub-module within an existing module, be sure to add `semVerEnforceAfterVersion` in the sbt settings
  and that version is a minor update.
 
-    Example: Current tag is 1.3.4. Then the sbt sub-module settings should have `semvVerEnforceAfterVersion := 1.4.0`
+    Example: Current tag is 1.3.4. Then the sbt sub-module settings should have `semVerEnforceAfterVersion := Some("1.4.0")`

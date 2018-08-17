@@ -21,8 +21,8 @@ class MimaChecker(miMaExecutor: MiMaExecutor) {
 /** Indicates whether the error is a backwards or forwards compatible error */
 object Direction extends scala.Enumeration {
 
-  val Backward = Value("backward")
-  val Forward = Value("forward")
+  final val Backward = Value("backward")
+  final val Forward = Value("forward")
 }
 
 case class MiMaProblem(direction: Direction.Value, message: String)

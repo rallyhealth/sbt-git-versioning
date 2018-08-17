@@ -3,7 +3,7 @@ package com.rallyhealth.sbt.versioning
 import com.rallyhealth.sbt.util.NullSbtLogger
 import com.rallyhealth.sbt.versioning.SemanticVersion._
 import org.scalatest.FunSpec
-import sbt.util.Logger
+import sbt.Logger
 
 import scala.util.Random
 
