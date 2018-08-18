@@ -32,13 +32,13 @@ class SemVerVersionTooLowException(
       }
       .mkString(System.lineSeparator)
 
-    s"""Your changes have ${violations.mkString(" and ")} which violates the http://semver.org rules for a $attempted release ($prev => $curr).
+    s"""Your changes have ${violations.mkString(" and ")} which violates the http://semver.org rules for a $attempted release.
        |
        |Specifically, MiMa detected the following binary incompatibilities:
        |$problemsString
        |
-       |These changes would require a ${miMaResult.releaseType} release instead (${prev} => ${requiredVersion}).
+       |These changes would require a ${miMaResult.releaseType} release instead ($prev => $requiredVersion).
        |You can adjust the version by adding the following setting:
-       |  .settings(gitVersioningSnapshotLowerBound := "${requiredVersion}")""".stripMargin
+       |  gitVersioningSnapshotLowerBound in ThisBuild := "$requiredVersion"""".stripMargin
   }
 )

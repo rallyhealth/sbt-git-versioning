@@ -1,4 +1,4 @@
-scalaVersion in ThisBuild := "2.11.8"
+scalaVersion in ThisBuild := "2.11.12"
 
 organization in ThisBuild := "com.rallyhealth.test.scripted"
 

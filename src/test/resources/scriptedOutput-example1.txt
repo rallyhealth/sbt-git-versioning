@@ -159,7 +159,7 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0m[ScriptedUtils] Starting compile_with_unset_limit ----------------------------[0m[0m
 [0m[[0minfo[0m] [0m[0m[[32msuccess[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:22 PM[0m[0m
 [0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mUpdating {file:/private/var/folders/vp/p4d6nc0d7bnctv6j0lgr3ky40000gp/T/sbt_6c5b0244/sanity/}sanity...[0m[0m
-[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-library;2.11.8 ...[0m[0m
+[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-library;2.11.12 ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
 [0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
@@ -169,9 +169,9 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m  /Users/patrick.bohan/.ivy2/local/com.rallyhealth/sbt-git-versioning/1.0.0-m1-4-bd0d236-dirty-SNAPSHOT/ivys/ivy.xml[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m==== public: tried[0m[0m
 [0m[[0minfo[0m] [0m[0m[[33mwarn[0m] [0m  https://repo1.maven.org/maven2/com/rallyhealth/sbt-git-versioning/1.0.0-m1-4-bd0d236-dirty-SNAPSHOT/sbt-git-versioning-1.0.0-m1-4-bd0d236-dirty-SNAPSHOT.pom[0m[0m
-[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-compiler;2.11.8 ...[0m[0m
+[0m[[0minfo[0m] [0m[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-compiler;2.11.12 ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
-[0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-reflect;2.11.8 ...[0m[0m
+[0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-reflect;2.11.12 ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
 [0m[[0minfo[0m] [0m[2K[0m[[0minfo[0m] [0mResolving org.scala-lang.modules#scala-xml_2.11;1.0.4 ...[0m[0m
 [0m[[0minfo[0m] [0m[A[0m
@@ -258,7 +258,7 @@ Initialized empty Git repository in /private/var/folders/vp/p4d6nc0d7bnctv6j0lgr
 [0m[[0minfo[0m] [0m	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)[0m
 [0m[[0minfo[0m] [0m	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)[0m
 [0m[[0minfo[0m] [0m	at java.lang.Thread.run(Thread.java:745)[0m
-[0m[[0minfo[0m] [0m[0m[[31merror[0m] [0m({.}/*:[31msemVerLimit[0m) java.lang.IllegalArgumentException: 'semVerLimit' is not set in your 'build.sbt': 'semVerLimit' is a threshold version, it is a version you do NOT want to exceed with these changes. If non-empty the `semVerCheck` will ensure that your changes do not require a release EQUAL or GREATER than this version. (no default value)[0m[0m
+[0m[[0minfo[0m] [0m[0m[[31merror[0m] [0m({.}/*:[31msemVerVersionLimit[0m) java.lang.IllegalArgumentException: 'semVerLimit' is not set in your 'build.sbt': 'semVerLimit' is a threshold version, it is a version you do NOT want to exceed with these changes. If non-empty the `semVerCheck` will ensure that your changes do not require a release EQUAL or GREATER than this version. (no default value)[0m[0m
 [0m[[0minfo[0m] [0m[0m[[31merror[0m] [0m(*:[31mupdate[0m) sbt.ResolveException: unresolved dependency: com.rallyhealth#sbt-git-versioning;1.0.0-m1-4-bd0d236-dirty-SNAPSHOT: not found[0m[0m
 [0m[[0minfo[0m] [0m[0m[[31merror[0m] [0mTotal time: 0 s, completed Nov 27, 2016 10:26:23 PM[0m[0m
 [0m[[0minfo[0m] [0mjava.lang.AssertionError: assertion failed: Could not find '[error]' in log:[0m
