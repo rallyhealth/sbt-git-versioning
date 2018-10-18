@@ -72,6 +72,8 @@ class GitDriverImpl(dir: File) extends GitDriver {
 
   require(isGitRepo(dir), "Must be in a git repository")
 
+  private class GitException(msg: String) extends Exception(msg)
+
   private def isGitRepo(dir: File): Boolean = {
     // this does NOT use runCommand() because that uses this method to check if the directory is a git directory
     val outputLogger = new BufferingProcessLogger
@@ -79,7 +81,15 @@ class GitDriverImpl(dir: File) extends GitDriver {
     val exitCode: Int = Process(s"""git rev-parse --is-inside-work-tree""", dir) ! outputLogger
     exitCode match {
       case 0 => outputLogger.stdout.mkString("").trim.toLowerCase == "true"
-      case _ => false
+      case 128 => false // https://stackoverflow.com/a/19441790
+      case unexpected =>
+        throw new GitException(
+          s"""Unexpected git exit status: $unexpected
+             |stderr:
+             |${outputLogger.stderr.mkString("\n")}
+             |stdout:
+             |${outputLogger.stdout.mkString("\n")}""".stripMargin
+           )
     }
   }
 
