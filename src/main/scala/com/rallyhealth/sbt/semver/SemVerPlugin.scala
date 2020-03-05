@@ -196,7 +196,7 @@ object SemVerPlugin extends AutoPlugin {
 
     MiMa.miMaChecker := {
       val classpath = (fullClasspath in MimaKeys.mimaFindBinaryIssues).value
-      new MimaChecker(MiMaExecutor(classpath, streams.value))
+      new MimaChecker(MiMaExecutor(classpath, streams.value), MimaKeys.mimaBinaryIssueFilters.value)
     },
 
     MiMa.moduleResolver := new IvyModuleResolver(scalaModuleInfo.value, ivySbt.value, streams.value),
