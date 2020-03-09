@@ -1,0 +1,25 @@
+############################################################################################################
+# Tests to validate that the shas returned from reflog are converted to git log commits
+
+# Init the repo
+$ exec git init
+$ touch bar.txt
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+> setRelease patch
+> reload
+> assertVersion 0.0.1
+> clearRelease
+$ exec git tag v0.0.1
+
+# do a lot of work with commits for each change
+$ exec awk 'BEGIN{ split("fubar",a,""); for(i=1;i<=length(a);i++) {print a[i] >> "bar.txt"; system("git add ."); system("git commit -am \"letter: "a[i]"\"")} }'
+
+# Someone is preparing a release and needs a stable artifact for integration
+> setRelease major
+> reload
+> assertVersion 1.0.0
+> clearRelease
+$ exec git tag -m "v1.0.0" -m "this is how we tag on the build server" "v1.0.0"
+# we want it to successfully reload before it was failing on reload
+> reload

@@ -6,10 +6,6 @@ organization := "com.rallyhealth.test.scripted"
 
 scalacOptions ++= Seq("-Xfatal-warnings", "-Xlint")
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
-
-resolvers += "Artifactory Libs Releases" at "https://artifacts.werally.in/artifactory/libs-release"
-
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 
 publish := {}

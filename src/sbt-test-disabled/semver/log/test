@@ -19,7 +19,7 @@
 # absence of the log output for "xxx" is a good way to be sure "xxx" didn't execute unintentionally.
 
 # Notes:
-# - 'version' must be defined as 'version in ThisBuild' since it is defined by RallyVersioning in the
+# - 'version' must be defined as 'version in ThisBuild' since it is defined by GitVersioningPlugin in the
 # buildSettings scope ({.}/version) as opposed to the project settings scope.
 # - The "reload" task is should be run before tasks many tasks to ensure that any settings changed by the
 # previous tests are removed. Sometimes, when all tests change the same setting (or no settings) "reload"

@@ -25,6 +25,32 @@ object GitCommit {
     GitCommit(fullHash, fullHash.take(abbreviatedHashLength), tags)
 
   /**
+    * Converts a single line from a "git for-each-ref" command into a [[GitCommit]].
+    *
+    * @param logOutput Output from "git for-each-ref --sort=-v:refname refs/tags", looks like
+    * "5ca402250fd63e6ac3a9b51d457b89c092195098 commit refs/tags/v0.0.2"
+    * @param abbreviatedHashLength The length of abbreviated hashes. This is must be determined from git, and is used
+    * when outputting the hash.
+    */
+  def fromGitRef(logOutput: String, abbreviatedHashLength: Int): GitCommit = {
+    val hash = {
+      val pattern = ("^(" + HashSemVerIdentifier.regex + ")").r
+      pattern.findFirstIn(logOutput).getOrElse(
+        throw new IllegalArgumentException("no hash prefix in git log: " + logOutput))
+    }
+
+    val tags = {
+      val pattern = "refs/tags/(.+)$".r
+      pattern.findAllMatchIn(logOutput).toSeq
+        .map(_.group(1).trim) // get only the version, not the whole matching string
+        .filter(_.nonEmpty) // drop any blanks
+        .sorted.reverse
+    }
+
+    GitCommit(hash, abbreviatedHashLength, tags)
+  }
+
+  /**
     * Converts a single line from a "git log" command into a [[GitCommit]].
     *
     * @param logOutput Output from "git log --oneline --decorate=short --simplify-by-decoration", looks like

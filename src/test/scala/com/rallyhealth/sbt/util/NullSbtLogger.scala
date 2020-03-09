@@ -3,7 +3,7 @@ package com.rallyhealth.sbt.util
 import sbt.{ControlEvent, Level, LogEvent}
 
 /**
-  * No-op logger.
+  * Based on [[scala.tools.nsc.io.NullLogger]], which is inaccessible for some reason.
   */
 object NullSbtLogger extends sbt.BasicLogger {
 

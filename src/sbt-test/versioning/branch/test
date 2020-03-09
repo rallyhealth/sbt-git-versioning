@@ -1,0 +1,42 @@
+############################################################################################################
+# A release branch is created to run all releases then merged back into master
+# see readme
+
+# Init the repo
+$ exec git init
+$ touch bar.txt
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+$ exec git tag v0.0.2 -m ''
+
+# do a little work
+$ exec awk 'BEGIN{ a="fubar"; {print a >> "foo.txt"; system("git add ."); system("git commit -am \"letter: "a"\"")} }'
+
+# Fake a initial release
+> setRelease major
+> reload
+> assertVersion 1.0.0
+> clearRelease
+$ exec git tag v1.0.0 -m ''
+
+# Now create some commits
+$ exec git checkout -b rc
+$ exec touch fubar.txt
+$ exec git add .
+$ exec git commit -am 'fubar.txt'
+
+# do a bunch of commits to the file in a new branch
+$ exec awk 'BEGIN{ split("fubar",a,""); for(i=1;i<=length(a);i++) {print a[i] > "fubar.txt"; system("git commit -am \"letter: "a[i]"\"")} }'
+
+# Fake a new release off the release branch
+> setRelease major
+> reload
+> assertVersion 2.0.0
+> clearRelease
+$ exec git tag v2.0.0 -m ''
+
+# Now fake merging the PR
+$ exec git checkout master
+$ exec git merge --no-ff rc -m "Merge branch 'rc' via fake PR"
+> reload
+> assertVersion 2.0.1-1-<hash>-SNAPSHOT

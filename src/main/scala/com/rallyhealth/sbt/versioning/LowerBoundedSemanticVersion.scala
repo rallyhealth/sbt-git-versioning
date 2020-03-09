@@ -17,7 +17,8 @@ object LowerBoundedSemanticVersion {
     /**
       * A new [[SemanticVersion]] increased up to the provided lower bound or else the original [[version]].
       *
-      * @param hash Used to fill in the hash if this returns a new [[SemanticVersion]]
+      * @param bound Used to set the stable portion of the generated lower bound
+      * @param hashAndCount Used to fill in the hash and count of the lower bound
       * @return A new [[SemanticVersion]] increased up to the provided lower bound, or else the original [[version]].
       */
     def lowerBound(bound: LowerBound, hashAndCount: HashAndCount): SemanticVersion = {
@@ -31,7 +32,10 @@ object LowerBoundedSemanticVersion {
         hashAndCount.count
       )
 
-      if (lowerBoundedVersion > version) lowerBoundedVersion else version
+      if (lowerBoundedVersion > version) {
+        require(version.isSnapshot, s"gitVersioningSnapshotLowerBound=$bound is higher than release=$version. Refusing to do a release build.")
+        lowerBoundedVersion
+      } else version
     }
   }
 
