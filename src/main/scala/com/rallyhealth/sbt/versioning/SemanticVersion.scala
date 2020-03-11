@@ -29,6 +29,10 @@ sealed trait SemanticVersion extends Ordered[SemanticVersion] {
     */
   def versionIdentifiers: SemVerIdentifierList
 
+  def isRelease: Boolean
+
+  def isSnapshot: Boolean = !isRelease
+
   override lazy val toString: String = {
     val tagStr = identifiers.toString
     s"$major.$minor.$patch" + (if (tagStr.isEmpty) "" else SemVerIdentifierList.separatorChar + tagStr)
@@ -170,6 +174,8 @@ case class ReleaseVersion(
   }
 
   override def toRelease: ReleaseVersion = this
+
+  override def isRelease: Boolean = true
 }
 
 object ReleaseVersion {
@@ -271,12 +277,14 @@ case class SnapshotVersion(
       0
 
     case thatRelease: ReleaseVersion =>
-      val superDelta = toRelease.compare(thatRelease)
+      // Compare only major.minor.patch ignoring "dirty" as a tie-breaker.
+      val majorMinorPatchDelta = toRelease.copy(isDirty = false).compare(thatRelease.copy(isDirty = false))
+
       // snapshots for this release are considered LESS than the release, see http://semver.org/#spec-item-11
-      if (superDelta == 0)
+      if (majorMinorPatchDelta == 0)
         -1
       else
-        superDelta
+        majorMinorPatchDelta
   }
 
   /**
@@ -314,6 +322,8 @@ case class SnapshotVersion(
   def undoNextVersion(): SnapshotVersion = copy(patch = patch - 1)
 
   override def toRelease: ReleaseVersion = ReleaseVersion(major, minor, patch, versionIdentifiers, isDirty)
+
+  override def isRelease: Boolean = false
 }
 
 object SnapshotVersion {

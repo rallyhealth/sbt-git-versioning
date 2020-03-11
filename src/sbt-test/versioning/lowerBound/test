@@ -34,15 +34,9 @@ $ exec git tag v1.0.0
 > 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
 > assertVersion 1.0.0
 
-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
-> assertVersion 1.0.1-0-<hash>-SNAPSHOT
+-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
 
-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
-> assertVersion 1.2.0-0-<hash>-SNAPSHOT
-
-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
-> assertVersion 2.2.2-0-<hash>-SNAPSHOT
-
+# Dirty release, but still a release (i.e. v1.0.0-dirty)
 $ touch dirty.txt
 $ exec git add dirty.txt
 > reload
@@ -53,11 +47,22 @@ $ exec git add dirty.txt
 > 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
 > assertVersion 1.0.0-dirty-SNAPSHOT
 
-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
-> assertVersion 1.0.1-0-<hash>-dirty-SNAPSHOT
+-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
 
-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.2.0"'
-> assertVersion 1.2.0-0-<hash>-dirty-SNAPSHOT
+$ exec git commit -am "We're a 1.0.1-snapshot now."
+> reload
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "0.0.1"'
+> assertVersion 1.0.1-1-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
+> assertVersion 1.0.1-1-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.1"'
+> assertVersion 1.0.1-1-<hash>-SNAPSHOT
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.1.0"'
+> assertVersion 1.1.0-1-<hash>-SNAPSHOT
 
 > 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.2.2"'
-> assertVersion 2.2.2-0-<hash>-dirty-SNAPSHOT
+> assertVersion 2.2.2-1-<hash>-SNAPSHOT

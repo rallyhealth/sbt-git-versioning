@@ -7,7 +7,8 @@ There are two sbt plugins in this one plugin library:
 
 # Compatibility
 
-Tested and supported for sbt versions: 0.13.17, 1.1.6, and 1.2.1
+Tested and supported for sbt versions: 0.13.18 and 1.2.8. We don't currently support SBT 1.3.x because [there isn't a
+version of MiMa 0.3.0 built for SBT 1.3.x, only for 1.2.x and 0.13.x](https://github.com/lightbend/mima#usage).
 
 # Install
 
@@ -106,19 +107,19 @@ This is useful for preparing major releases with breaking changes (esp. when com
 
 The release arg bumps the version up by a major, minor, or patch increment.
 ```
-sbt -Drelease=major ...
+sbt -Drelease=<major|minor|patch> ...
 ```
 
 The release arg alters the value of `versionFromGit`, but is still bounded by `gitVersioningSnapshotLowerBound`. For example:
 
 | versionFromGit | -Drelease | gitVersioningSnapshotLowerBound | Final Version |
-| -------------- | --------- | --------------------------------- | ------------- |
-| 1.0.0          | patch     |                                   | 1.0.1         |
-| 1.0.0          | minor     |                                   | 1.1.0         |
-| 1.0.0          | major     |                                   | 2.0.0         |
-| 1.0.0          | patch     | 2.0.0                             | 2.0.0-n-0123abc-SNAPSHOT |
-| 1.0.0          | minor     | 2.0.0                             | 2.0.0-n-0123abc-SNAPSHOT |
-| 1.0.0          | major     | 2.0.0                             | 2.0.0         |
+| -------------- | --------- | ------------------------------- | ------------- |
+| 1.0.0          | patch     |                                 | 1.0.1         |
+| 1.0.0          | minor     |                                 | 1.1.0         |
+| 1.0.0          | major     |                                 | 2.0.0         |
+| 1.0.0          | patch     | 2.0.0                           | 2.0.0-n-0123abc-SNAPSHOT |
+| 1.0.0          | minor     | 2.0.0                           | 2.0.0-n-0123abc-SNAPSHOT |
+| 1.0.0          | major     | 2.0.0                           | 2.0.0         |
 
 #### Example
 With most recent git tag at `v1.4.2` and a `gitVersioningSnapshotLowerBound` setting of:
@@ -136,7 +137,7 @@ $ sbt
 ### Notes
 
 * The patch version is incremented if there are commits, dirty or not. But it is not incremented if there are no
-commits.
+commits. (I'm not clear on why this is, but it is legacy behavior.)
 * The hash does **not** have a 'g' prefix like the output of `git describe`
 * A build will be flagged as not clean (and will have a `-dirty-SNAPSHOT` identifier applied) if
 `git status --porcelain` returns a non-empty result.

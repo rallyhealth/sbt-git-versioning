@@ -1,11 +1,11 @@
 package com.rallyhealth.sbt.versioning
 
 import com.rallyhealth.sbt.versioning.LowerBoundedSemanticVersion._
-import org.scalatest.FunSpec
+import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
 
-class LowerBoundedSemanticVersionSpec extends FunSpec {
+class LowerBoundedSemanticVersionSpec extends FunSpec with Matchers {
 
   private val hash1 = HashSemVerIdentifier("0123abc")
   // for these tests we need a full hash, not an abbreviation
@@ -32,15 +32,9 @@ class LowerBoundedSemanticVersionSpec extends FunSpec {
       it("higher bound") {
         val version = ReleaseVersion(1, 2, 3, SemVerIdentifierList.empty, isDirty = false)
         val bound = LowerBound(1, 2, 4)
-        val result = version.lowerBound(bound, hashAndCount1)
-        assert(result === SnapshotVersion(1, 2, 4, SemVerIdentifierList.empty, false, hashAndCount1, 1))
-      }
-
-      it("identifiers") {
-        val version = ReleaseVersion(1, 0, 0, Seq("rc.0"), isDirty = false)
-        val bound = LowerBound(2, 0, 0)
-        val result = version.lowerBound(bound, hashAndCount1)
-        assert(result === SnapshotVersion(2, 0, 0, SemVerIdentifierList.empty, false, hashAndCount1, 1))
+        an[IllegalArgumentException] shouldBe thrownBy {
+          version.lowerBound(bound, hashAndCount1)
+        }
       }
     }
 
@@ -80,6 +74,14 @@ class LowerBoundedSemanticVersionSpec extends FunSpec {
         val result = version.lowerBound(bound, hashAndCount1)
         assert(result.toString === s"2.0.0-1-$hash1-SNAPSHOT")
       }
+
+      it("identifiers") {
+        val version = SnapshotVersion(1, 0, 0, Seq("rc.0"), isDirty = false, hashAndCount1, 1)
+        val bound = LowerBound(2, 0, 0)
+        val result = version.lowerBound(bound, hashAndCount1)
+        assert(result === SnapshotVersion(2, 0, 0, SemVerIdentifierList.empty, false, hashAndCount1, 1))
+      }
+
     }
   }
 

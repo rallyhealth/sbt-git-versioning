@@ -29,12 +29,6 @@ $ exec git tag v1.2.3
 > clearRelease
 > reload
 > assertVersion 1.2.3
-
-# Work around lack of https://github.com/AudaxHealthInc/sbt-git-versioning/pull/64 by adding a commit.
-$ exec touch whatever.txt
-$ exec git add .
-$ exec git commit -am 'Commit message.'
-
 > setRelease major
 > reload
 
@@ -47,5 +41,4 @@ $ exec git commit -am 'Commit message.'
 > 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.0.0"'
 > assertVersion 2.0.0
 
-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.0.1"'
-> assertVersion 2.0.1-1-<hash>-SNAPSHOT
+-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.0.1"'

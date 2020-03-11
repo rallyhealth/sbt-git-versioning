@@ -1,15 +1,11 @@
 package com.rallyhealth.sbt.versioning
 
-import com.rallyhealth.sbt.util.NullSbtLogger
 import com.rallyhealth.sbt.versioning.SemanticVersion._
 import org.scalatest.FunSpec
-import sbt.Logger
 
 import scala.util.Random
 
 class SemanticVersionSpec extends FunSpec {
-
-  implicit val logger: Logger = NullSbtLogger
 
   describe("ReleaseVersion") {
 
@@ -169,6 +165,12 @@ class SemanticVersionSpec extends FunSpec {
         assert(version.isDirty, version)
         assert(version.identifiers.values.map(_.toString) === Seq("rc1", "beta", "99", "1234567", "dirty", "SNAPSHOT"))
         assert(SnapshotVersion.regex.pattern.matcher(version.toString).matches, version.toString)
+      }
+
+      it("dirty snapshot vs release") {
+        val current = SemanticVersion.fromString("1.0.0-1-f650aaa-dirty-SNAPSHOT").get
+        val enforceAfterVersion = SemanticVersion.fromString("1.0.0").get
+        assert(current <= enforceAfterVersion)
       }
     }
 

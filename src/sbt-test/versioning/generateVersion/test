@@ -1,0 +1,27 @@
+############################################################################################################
+# Test generateVersion
+
+# Init the repo
+$ exec git init
+
+# No prior commits
+$ exec git add .
+> reload
+> assertGenerateVersion 0\.0\.1-dirty-SNAPSHOT
+
+# Initial commit
+$ exec git commit -m "Initial commit"
+> reload
+> 'assertGenerateVersion 0\.0\.1-1-[0-9a-f]{7,}-SNAPSHOT'
+
+# Dirty
+$ touch file1.txt
+$ exec git add file1.txt
+> reload
+> 'assertGenerateVersion 0\.0\.1-1-[0-9a-f]{7,}-dirty-SNAPSHOT'
+
+# Release commit
+$ exec git commit -m "Initial commit"
+$ exec git tag v1.0.0
+> reload
+> assertGenerateVersion 1\.0\.0

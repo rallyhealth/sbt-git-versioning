@@ -43,7 +43,7 @@ class NormalVersionBump(
 case class MinorOkayForSnapshot(version: SemanticVersion) extends SemVerEnforcementLevel(
   releaseType = Minor,
   explanation = "SNAPSHOT rules are relaxed for convenience and may include up to minor changes. " +
-  "This is not part of the SemVer spec, but RallyVersioning can't do this automatically " +
+  "This is not part of the SemVer spec, but GitVersioningPlugin can't do this automatically " +
   "without requiring you to manually bump semVerLimit every time you add a method. " +
   "Minor version bumps are enforced only at release time."
 )

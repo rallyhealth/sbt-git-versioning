@@ -3,6 +3,7 @@ package com.rallyhealth.sbt.semver
 import com.rallyhealth.sbt.semver.level._
 import com.rallyhealth.sbt.semver.level.rule._
 import com.rallyhealth.sbt.semver.mima._
+import com.rallyhealth.sbt.versioning.GitVersioningPlugin.autoImport.semanticVersion
 import com.rallyhealth.sbt.versioning.{ReleaseVersion, SemVerReleaseType, SemanticVersion}
 import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
 import com.typesafe.tools.mima.plugin.{MimaKeys, MimaPlugin}
@@ -95,8 +96,7 @@ object SemVerPlugin extends AutoPlugin {
 
     semVerEnforceAfterVersion := None,
 
-    semVerVersion := SemanticVersion.fromString(version.value).getOrElse(
-      throw new IllegalArgumentException(s"version=${version.value} is not a valid SemVer")),
+    semVerVersion := semanticVersion.value,
 
     semVerLimit := "deprecated"
   )

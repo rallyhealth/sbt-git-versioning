@@ -30,7 +30,14 @@ case class GitWorkingState(isDirty: Boolean)
   * [[Option]]s represent multiple states in one class). I learned that makes the logic harder to follow and introduces
   * cyclomatic complexity (i.e. nested logic).
   */
-sealed trait GitBranchState
+sealed trait GitBranchState {
+
+  /** Similar to [[Predef.require()]] yet it tacks on "this" to the end of the message. */
+  protected def require(requirement: Boolean, message: => Any) {
+    if (!requirement)
+      throw new IllegalArgumentException(s"requirement failed: $message (from $this)")
+  }
+}
 
 /**
   * This is used when there are two (2) commits that are tagged as [[ReleaseVersion]]s, and the HEAD commit is the

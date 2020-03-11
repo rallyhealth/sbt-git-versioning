@@ -2,6 +2,7 @@ package com.rallyhealth.sbt.versioning
 
 import java.io.File
 
+import sbt.util._
 import scala.sys.process._
 
 /**
@@ -71,9 +72,37 @@ trait GitDriver {
 class GitDriverImpl(dir: File) extends GitDriver {
 
   require(isGitRepo(dir), "Must be in a git repository")
+  require(isGitCompatible, "Must be git version 2.X.X or greater")
 
   private class GitException(msg: String) extends Exception(msg)
 
+  // Validate that the git version is over 2.X.X
+  protected def isGitCompatible: Boolean = {
+    val outputLogger = new BufferingProcessLogger
+    val exitCode: Int = Process(s"""git --version""", dir) ! outputLogger
+    // git --version returns: git version x.y.z
+    val gitSemver = """git version (\d+)\.(\d+)\.(\d+).*""".r
+    exitCode match {
+      case 0 =>
+        val gitVersion = outputLogger.stdout.mkString("").trim.toLowerCase
+        gitVersion match {
+          case gitSemver(major, minor, patch) =>
+            major.toInt > 1
+          case _ =>
+            throw new GitException(
+              s"""Version output was not of the form 'git version x.y.z'
+              |version was '${gitVersion}'""".stripMargin)
+        }
+      case unexpected =>
+        throw new GitException(
+          s"""Unexpected git exit status: $unexpected
+             |stderr:
+             |${outputLogger.stderr.mkString("\n")}
+             |stdout:
+             |${outputLogger.stdout.mkString("\n")}""".stripMargin
+        )
+    }
+  }
   private def isGitRepo(dir: File): Boolean = {
     // this does NOT use runCommand() because that uses this method to check if the directory is a git directory
     val outputLogger = new BufferingProcessLogger
@@ -89,7 +118,7 @@ class GitDriverImpl(dir: File) extends GitDriver {
              |${outputLogger.stderr.mkString("\n")}
              |stdout:
              |${outputLogger.stdout.mkString("\n")}""".stripMargin
-           )
+        )
     }
   }
 
@@ -98,8 +127,18 @@ class GitDriverImpl(dir: File) extends GitDriver {
 
       case Some(headCommit) =>
 
-        // we only care about the RELEASE commits
-        val releases: Seq[(GitCommit, ReleaseVersion)] = gitLog("").collect { case gc @ ReleaseVersion(rv) => (gc, rv) }
+        // we only care about the RELEASE commits so let's get them in order from reflog
+        val releaseRefs: Seq[(GitCommit, ReleaseVersion)] = gitForEachRef("").collect { case gc @ ReleaseVersion(rv) => (gc, rv) }
+
+        // We only care about the current release and previous release so let's take the top two.
+        // Then we want to find out what which git log commit is associated to the reflog sha.
+        // Note: gitForEachRef will return return reference shas and the tags associated with them.
+        // the reference shas are not always the same as the commit shas associated with git log.
+        // That is why we have to run the command here to find the correct sha
+        // Note: do not move git log into gitForEachRef as on long revisions it will take a LOT of time
+        val releases: Seq[(GitCommit, ReleaseVersion)] = releaseRefs.take(2).map(tp =>
+          (gitLog(s"${tp._1.fullHash} --max-count=1").head, tp._2)
+        )
 
         val maybeCurrRelease = releases.headOption
         val maybePrevRelease = releases.drop(1).headOption
@@ -139,15 +178,73 @@ class GitDriverImpl(dir: File) extends GitDriver {
   }
 
   /**
+    * Executes git rev-parse to determine the current branch/HEAD commit
+    */
+  private def gitBranch: String = {
+    val cmd = s"git rev-parse --abbrev-ref HEAD"
+    val (exitCode, output) = runCommand(cmd, throwIfNonZero = false)
+    exitCode match {
+      // you get 128 when you run a git cmd in a dir not under git vcs
+      case 0 =>
+        val res = output.map { line =>
+          line
+        }
+        res.head
+      case 128 =>
+        throw new IllegalStateException(
+          s"Error 128: a git cmd was run in a dir that is not under git vcs or git rev-parse failed to run.")
+    }
+  }
+
+  /**
+    * Returns an ordered list of versions that are merged into your branch.
+    */
+  private def gitForEachRef(arguments: String): Seq[GitCommit] = {
+    require(isGitRepo(dir), "Must be in a git repository")
+    require(isGitCompatible, "Must be git version 2.X.X or greater")
+
+    // Note: nested shell commands, piping and redirection will not work with runCommand since it is just
+    // invoking an OS process. You could invoke a shell and pass expressions if needed.
+    val cmd = s"git for-each-ref --sort=-v:refname refs/tags --merged=${gitBranch}"
+
+    /**
+      * Example output:
+      * {{{
+      * 686623c25b52e40fe6270ab57419551b88e89dfe tag    refs/tags/v1.0.0
+      * fb22d49dd7d7bf5b5f130c4ff3b66667d97bc308 commit refs/tags/v0.0.3
+      * 5ca402250fd63e6ac3a9b51d457b89c092195098 commit refs/tags/v0.0.2
+      * }}}
+      */
+
+    // val (exitCode, output) = runCommand(cmd, throwIfNonZero = false)
+    val (exitCode, output) = runCommand(cmd, throwIfNonZero = false)
+    exitCode match {
+      // you get 128 when you run 'git log' on a repository with no commits
+      case 0 | 128 =>
+        val abbreviatedHashLength = findAbbreviatedHashLength()
+        output map { line =>
+          GitCommit.fromGitRef(line, abbreviatedHashLength)
+        }
+      case ret => throw new IllegalStateException(s"Non-zero exit code when running git log: $ret")
+    }
+  }
+
+  /**
     * Executes a single "git log" command.
     */
   private def gitLog(arguments: String): Seq[GitCommit] = {
     require(isGitRepo(dir), "Must be in a git repository")
+    require(isGitCompatible, "Must be git version 2.X.X or greater")
 
     // originally this used "git describe", but that doesn't always work the way you want. its definition of "nearest"
     // tag is not always what you think it means: it does NOT search backward to the root, it will search other
     // branches too. See http://www.xerxesb.com/2010/12/20/git-describe-and-the-tale-of-the-wrong-commits/
-    val cmd = s"git log --oneline --decorate=short --first-parent --simplify-by-decoration --no-abbrev-commit $arguments"
+    // The old command was the following:
+    //   git log --oneline --decorate=short --first-parent --simplify-by-decoration --no-abbrev-commit
+    //   which has the argument --first-parent. The problem is that first-parent will hide release that are done in in another
+    //   branch and merged into master.
+
+    val cmd = s"git log --oneline --decorate=short --simplify-by-decoration --no-abbrev-commit $arguments"
     /**
       * Example output:
       * {{{
@@ -162,7 +259,9 @@ class GitDriverImpl(dir: File) extends GitDriver {
       // you get 128 when you run 'git log' on a repository with no commits
       case 0 | 128 =>
         val abbreviatedHashLength = findAbbreviatedHashLength()
-        output.map(line => GitCommit.fromGitLog(line, abbreviatedHashLength))
+        output map { line =>
+          GitCommit.fromGitLog(line, abbreviatedHashLength)
+        }
       case ret => throw new IllegalStateException(s"Non-zero exit code when running git log: $ret")
     }
   }
@@ -205,6 +304,7 @@ class GitDriverImpl(dir: File) extends GitDriver {
     */
   private def runCommand(cmd: String, throwIfNonZero: Boolean = true): (Int, Seq[String]) = {
     require(isGitRepo(dir), "Must be in a git repository")
+    require(isGitCompatible, "Must be git version 2.X.X or greater")
     val outputLogger = new BufferingProcessLogger
     val exitCode: Int = Process(cmd, dir) ! outputLogger
     val result = (exitCode, outputLogger.stdout)
