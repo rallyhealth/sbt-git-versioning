@@ -1,0 +1,121 @@
+###########################################################################################################
+# Rename an artifact, ensure that SemVer freaks out because it can't find the old artifact. In this
+# scenario SemVer can only be bypassed by making a MAJOR version change.
+###########################################################################################################
+
+# Set up a git repo appease GitVersioningPlugin and tag first version.
+$ exec git init
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+$ exec git tag v1.0.0
+
+###########################################################################################################
+# Sanity Checks
+
+# Publish the first version so that SemVer will have a baseline to compare to.
+> reload
+> startTest publish_old_and_busted
+> publishLocal
+> grepLog """published old-and-busted_2\\.11 to .*?/com.rallyhealth.test.scripted/old-and-busted_2\\.11/1\\.0\\.0/"""
+
+# Rename the artifact (temporarily, with no changes, and it should publish since there's no previous version to compare
+# against. We only do this temporarily, using a different name than "new-hotness" because we don't want to publish
+# a "new-hotness" 1.0.0 that other tests might mistakenly use.
+> reload
+> startTest rename_artifact_temporarily
+> 'set name := "old-and-busted-with-new-name"'
+> publishLocal
+> grepLog """published old-and-busted-with-new-name_2\\.11 to .*?/com.rallyhealth.test.scripted/old-and-busted-with-new-name_2\\.11/1\\.0\\.0/"""
+
+###########################################################################################################
+# Rename package (code directory)
+
+# Renaming the packages is essential to renaming the artifact. When you rename an artifact you should
+# always change the package name too, otherwise you could end up importing two differently named artifacts
+# with the same class names!
+
+$ exec git mv src/main/scala/oldAndBusted src/main/scala/newHotness
+> replaceAllInFile src/main/scala/newHotness/Thing.scala oldAndBusted newHotness
+
+# Should fail with the same artifact name and limit because it looks like a major change.
+> reload
+> startTest publish_with_original_limit_after_package_change
+-> publishLocal
+> assertFailed major
+> searchLog not "published"
+
+# Fix the semVerVersionLimit
+> replaceAllInFile build.sbt 1\.999\.0 2\.999\.0
+
+# Success with the same artifact name because we increased our SemVer limit.
+> reload
+> startTest publish_with_updated_limit_after_package_change
+> publishLocal
+> assertAborted
+> grepLog """published old-and-busted_2\\.11 to .*?/com.rallyhealth.test.scripted/old-and-busted_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
+
+###########################################################################################################
+# Rename artifact
+
+> replaceAllInFile build.sbt old-and-busted new-hotness
+
+# Success with a different artifact name because we increased our SemVer limit.
+> reload
+> startTest publish_after_artifact_rename_dirty_new_limit
+> publishLocal
+> assertAborted
+> grepLog """published new-hotness_2\\.11 to .*?/com.rallyhealth.test.scripted/new-hotness_2\\.11/1\\.0\\.0-dirty-SNAPSHOT/"""
+
+# Failure with a different artifact name and limit (it looks for the old artifact)
+> reload
+> startTest publish_after_artifact_rename_dirty_orig_limit
+> 'set semVerVersionLimit := "1.999.0"'
+-> publishLocal
+> searchLog "Checking ENABLED"
+> searchLog "Check starting"
+> searchLog "UNRESOLVED DEPENDENCIES"
+> searchLog "com.rallyhealth.test.scripted#new-hotness_2.11;1.0.0: not found"
+> searchLog "[error]"
+> searchLog "sbt.ResolveException"
+
+###########################################################################################################
+# Commit the change
+
+$ exec git commit -am 'Renamed to "New Hotness"'
+
+# Success with a different artifact name because we increased our SemVer limit.
+> reload
+> startTest publish_after_artifact_rename_committed_new_limit
+> publishLocal
+> assertAborted
+> grepLog """published new-hotness_2\\.11 to .*?/com.rallyhealth.test.scripted/new-hotness_2\\.11/1\\.0\\.1-1-[0-9a-f]{7,}-SNAPSHOT/"""
+
+# Failure with a different artifact name and limit (it looks for the old artifact)
+> reload
+> startTest publish_after_artifact_rename_committed_orig_limit
+> 'set semVerVersionLimit := "1.999.0"'
+-> publishLocal
+> searchLog "Checking ENABLED"
+> searchLog "Check starting"
+> searchLog "UNRESOLVED DEPENDENCIES"
+> searchLog "com.rallyhealth.test.scripted#new-hotness_2.11;1.0.0: not found"
+> searchLog "[error]"
+> searchLog "sbt.ResolveException"
+
+###########################################################################################################
+# Tag as the next version
+$ exec git tag v2.0.0
+
+# Success with a different artifact name because we increased our SemVer limit.
+> reload
+> startTest publish_after_artifact_rename_tagged_new_limit
+> publishLocal
+> assertAborted
+> grepLog """published new-hotness_2\\.11 to .*?/com.rallyhealth.test.scripted/new-hotness_2\\.11/2\\.0\\.0/"""
+
+# Failure with a different artifact name and limit (limit is less than the tag's version)
+> reload
+> startTest publish_after_artifact_rename_tagged_orig_limit
+> 'set semVerVersionLimit := "1.999.0"'
+-> publishLocal
+> assertConfigError

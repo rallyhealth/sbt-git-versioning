@@ -3,4 +3,6 @@ resolvers += Resolver.url(
   url("https://dl.bintray.com/rallyhealth/sbt-plugins"))(Resolver.ivyStylePatterns)
 
 addSbtPlugin("com.rallyhealth.sbt" % "sbt-git-versioning" % "1.3.0")
-addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
+addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.6")
+
+libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value

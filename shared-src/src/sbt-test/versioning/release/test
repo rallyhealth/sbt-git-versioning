@@ -1,0 +1,50 @@
+############################################################################################################
+# Tests behavior around the release arg
+
+# Init the repo
+$ exec git init
+$ exec git add .
+$ exec git commit -am 'Initial commit.'
+
+# Tag it -> clean Release
+$ exec git tag v1.2.3
+> reload
+> assertVersion 1.2.3
+
+> setRelease patch
+> reload
+> assertVersion 1.2.4
+
+> setRelease minor
+> reload
+> assertVersion 1.3.0
+
+> setRelease major
+> reload
+> assertVersion 2.0.0
+
+############################################################################################################
+# Interactions with lower bound
+
+> clearRelease
+> reload
+> assertVersion 1.2.3
+
+# Work around lack of https://github.com/AudaxHealthInc/rally-versioning/pull/64 by adding a commit.
+$ exec touch whatever.txt
+$ exec git add .
+$ exec git commit -am 'Commit message.'
+
+> setRelease major
+> reload
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"'
+> assertVersion 2.0.0
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "1.2.3"'
+> assertVersion 2.0.0
+
+> 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.0.0"'
+> assertVersion 2.0.0
+
+-> 'set gitVersioningSnapshotLowerBound in ThisBuild := "2.0.1"'

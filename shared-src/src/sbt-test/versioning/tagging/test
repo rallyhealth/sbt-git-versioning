@@ -1,0 +1,78 @@
+############################################################################################################
+# Tagging tests for GitVersioningPlugin, some sane, some pathological
+
+# Init the repo
+$ exec git init
+
+# No prior commits, the specific version isn't hugely important but don't want it changing all the time
+> assertVersion 0.0.1-dirty-SNAPSHOT
+
+# No prior commits, dirty without hash
+$ exec git add .
+> reload
+> assertVersion 0.0.1-dirty-SNAPSHOT
+
+# No prior tags, first commit
+$ exec git commit -am 'Initial commit.'
+> reload
+> assertVersion 0.0.1-1-<hash>-SNAPSHOT
+
+# No prior tags, dirty snapshot with hash
+$ touch file1.txt
+$ exec git add .
+> reload
+> assertVersion 0.0.1-1-<hash>-dirty-SNAPSHOT
+
+# No prior tags, second commit
+$ exec git commit -am 'First commit after 0.0.1-1'
+> reload
+> assertVersion 0.0.1-2-<hash>-SNAPSHOT
+
+# HEAD is tagged, clean
+$ exec git tag v1.2.3
+> reload
+> assertVersion 1.2.3
+
+# HEAD is tagged, add file, NO RELOAD, clean
+# !!! This is (what I think) unexpected behavior -- if you don't reload you get the same 'clean' version
+# !!! even if the working directory is actually dirty.
+$ touch file2.txt
+$ exec git add .
+> assertVersion 1.2.3
+
+# HEAD is tagged, dirty snapshot without hash AFTER RELOAD
+> reload
+> assertVersion 1.2.3-dirty-SNAPSHOT
+
+# HEAD is not tagged, third commit, first after v1.2.3 tag
+$ exec git commit -am 'Third commit. Follows v1.2.3.'
+> reload
+> assertVersion 1.2.4-1-<hash>-SNAPSHOT
+
+# HEAD is not tagged, add file, NO RELOAD, clean
+# !!! This is (what I think) unexpected behavior -- if you don't reload you get the same 'clean' version
+# !!! even if the working directory is actually dirty.
+$ touch file3.txt
+$ exec git add .
+> assertVersion 1.2.4-1-<hash>-SNAPSHOT
+
+# HEAD is tagged, dirty snapshot with hash AFTER RELOAD
+> reload
+> assertVersion 1.2.4-1-<hash>-dirty-SNAPSHOT
+
+# Commit and tag it with a non-semver label. This is legal and should be ignored.
+$ exec git commit -am 'Fourth commit. Follows v1.2.3.'
+$ exec git tag ignoreme
+
+# HEAD is not tagged with a release version, Fourth commit, second after v1.2.3 tag
+> reload
+> assertVersion 1.2.4-2-<hash>-SNAPSHOT
+
+# Commit and tag it with a SemVer Release dirty label. This is legal and should be ignored.
+$ touch file4.txt
+$ exec git add .
+$ exec git commit -am 'Firth commit. Follows v1.2.3.'
+
+# HEAD is not tagged with a release version, Fourth commit, second after v1.2.3 tag
+> reload
+> assertVersion 1.2.4-3-<hash>-SNAPSHOT
