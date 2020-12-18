@@ -1,11 +1,13 @@
 package com.rallyhealth.sbt.versioning
 
 import com.rallyhealth.sbt.versioning.LowerBoundedSemanticVersion._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.language.implicitConversions
 
-class LowerBoundedSemanticVersionSpec extends FunSpec with Matchers {
+class LowerBoundedSemanticVersionSpec extends AnyFunSpec with Matchers with TypeCheckedTripleEquals {
 
   private val hash1 = HashSemVerIdentifier("0123abc")
   // for these tests we need a full hash, not an abbreviation

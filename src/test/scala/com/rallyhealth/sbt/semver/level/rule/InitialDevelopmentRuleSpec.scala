@@ -4,10 +4,12 @@ import com.rallyhealth.sbt.semver.TestSnapshotVersion
 import com.rallyhealth.sbt.versioning.ReleaseVersion
 import com.rallyhealth.sbt.versioning.SemVerReleaseType.Major
 import org.scalactic.TypeCheckedTripleEquals
-import org.scalatest.{LoneElement, Matchers, WordSpec}
+import org.scalatest.LoneElement
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 class InitialDevelopmentRuleSpec
-  extends WordSpec
+  extends AnyWordSpec
   with Matchers
   with LoneElement
   with TypeCheckedTripleEquals {

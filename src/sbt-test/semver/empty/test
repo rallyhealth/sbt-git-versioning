@@ -3,6 +3,7 @@
 ###########################################################################################################
 
 # Set up a git repo appease GitVersioningPlugin and tag first version.
+> pause
 $ exec git init
 $ exec git add .
 $ exec git commit -am 'Initial commit.'

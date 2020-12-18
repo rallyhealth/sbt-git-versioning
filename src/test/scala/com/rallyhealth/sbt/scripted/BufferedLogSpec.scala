@@ -1,13 +1,13 @@
 package com.rallyhealth.sbt.scripted
 
 import java.io.{BufferedReader, InputStream, InputStreamReader}
-
 import com.rallyhealth.sbt.scripted.BufferedLogSpec._
-import org.scalatest.FunSpec
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.util.Random
 
-class BufferedLogSpec extends FunSpec {
+class BufferedLogSpec extends AnyFunSpec with TypeCheckedTripleEquals {
 
   describe("removeFormatting") {
 

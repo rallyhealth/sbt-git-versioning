@@ -158,7 +158,7 @@ object GitVersioningPlugin extends AutoPlugin {
 
     versionFromGit := {
       // This depends on but does not use [[autoFetchResult]]; that ensures the task is run but ignores the result.
-      (autoFetchResult in ThisProject).value
+      val _ = (autoFetchResult in ThisProject).value
       val gitVersion = gitDriver.value.calcCurrentVersion(ignoreDirty.value)
 
       ConsoleLogger().info(s"GitVersioningPlugin set versionFromGit=$gitVersion")

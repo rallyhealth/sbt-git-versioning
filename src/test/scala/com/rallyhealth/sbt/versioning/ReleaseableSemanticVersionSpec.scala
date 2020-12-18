@@ -2,10 +2,11 @@ package com.rallyhealth.sbt.versioning
 
 import com.rallyhealth.sbt.versioning.SemVerReleaseType.{Major, Minor, Patch, ReleaseableSemanticVersion}
 import org.scalactic.TypeCheckedTripleEquals
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class ReleaseableSemanticVersionSpec
-  extends FunSpec
+  extends AnyFunSpec
   with Matchers
   with TypeCheckedTripleEquals {
 

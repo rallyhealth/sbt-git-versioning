@@ -2,9 +2,10 @@ package com.rallyhealth.sbt.semver
 
 import com.rallyhealth.sbt.semver.SemVerDiff.Delta
 import com.rallyhealth.sbt.versioning.{ReleaseVersion, SemVerIdentifierList}
-import org.scalatest.FunSpec
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.funspec.AnyFunSpec
 
-class SemVerDiffSpec extends FunSpec {
+class SemVerDiffSpec extends AnyFunSpec with TypeCheckedTripleEquals {
 
   describe("unchanged") {
 

@@ -6,10 +6,9 @@ import com.rallyhealth.sbt.semver.mima._
 import com.rallyhealth.sbt.versioning.GitVersioningPlugin.autoImport.semanticVersion
 import com.rallyhealth.sbt.versioning.{ReleaseVersion, SemVerReleaseType, SemanticVersion}
 import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
-import com.typesafe.tools.mima.plugin.{MimaKeys, MimaPlugin}
+import com.typesafe.tools.mima.plugin.{MimaKeys, MimaPlugin, SbtMima}
 import sbt.Keys._
 import sbt._
-import sbt.compat._  // Required import for sbt 0.13.x support
 import sbt.plugins.JvmPlugin
 
 /**
@@ -87,7 +86,6 @@ object SemVerPlugin extends AutoPlugin {
     lazy val miMaChecker: TaskKey[MimaChecker] = taskKey[MimaChecker]("Thin wrapper around typesafe's Migration Manager.")
     lazy val maybePrevRelease: TaskKey[Option[ReleaseVersion]] = taskKey[Option[ReleaseVersion]]("A previous release for MiMa to compare against, if any.")
     lazy val maybePrevInput: TaskKey[Option[MiMaInput]] = taskKey[Option[MiMaInput]]("The previous artifact for MiMa to compare against, if any.")
-    lazy val moduleResolver: TaskKey[ModuleResolver] = taskKey[ModuleResolver]("Resolves/Downloads an artifact, returning the location on the filesystem.")
   }
 
   override def buildSettings: Seq[Setting[_]] = Seq(
@@ -149,7 +147,7 @@ object SemVerPlugin extends AutoPlugin {
       val result = (compile in Compile).value
 
       // ensure that SemVer checking happens AFTER compilation
-      Def.taskDyn {
+      val _ = Def.taskDyn {
         if (semVerCheckOnCompile.value) semVerCheck
         else Def.task {}
       }.value
@@ -161,7 +159,7 @@ object SemVerPlugin extends AutoPlugin {
     // override above to "(compile in Compile)" causes SBT to hang. Since I can't disambiguate "compile" I'm left with
     // overriding "test" directly.
     test := {
-      (test in Test).value
+      val _ = (test in Test).value
 
       // ensure that SemVer checking happens AFTER testing
       Def.taskDyn {
@@ -196,22 +194,26 @@ object SemVerPlugin extends AutoPlugin {
 
     MiMa.miMaChecker := {
       val classpath = (fullClasspath in MimaKeys.mimaFindBinaryIssues).value
-      new MimaChecker(MiMaExecutor(classpath, streams.value), MimaKeys.mimaBinaryIssueFilters.value)
+      new MimaChecker(classpath, scalaVersion.value, MimaKeys.mimaBinaryIssueFilters.value, streams.value.log)
     },
-
-    MiMa.moduleResolver := new IvyModuleResolver(scalaModuleInfo.value, ivySbt.value, streams.value),
 
     MiMa.maybePrevRelease := SemVerTasks.prevRelease.value,
 
     MiMa.maybePrevInput := {
-      val mimaModuleResolver = MiMa.moduleResolver.value
+      val depResolutionStyle = dependencyResolution.value
+      val taskStream = streams.value
 
       MiMa.maybePrevRelease.value.map { relVer =>
         val moduleID = organization.value %% name.value % relVer.toString
-        val file = mimaModuleResolver.resolve(moduleID)
+        val previousModuleID = CrossVersion(moduleID, scalaModuleInfo.value) match {
+          case Some(f) => moduleID.withName(f(moduleID.name))
+          case None => moduleID
+        }
+        val file = SbtMima.getPreviousArtifact(previousModuleID, depResolutionStyle, taskStream)
         MiMaInput(file, relVer)
       }
     },
+
     semVerCheckValidVersion := {
       MiMa.maybePrevRelease.value.foreach { prev =>
         if (semVerVersion.value <= prev) {

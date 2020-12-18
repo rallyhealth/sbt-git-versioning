@@ -2,22 +2,28 @@ package com.rallyhealth.sbt.semver.mima
 
 import com.rallyhealth.sbt.versioning.SemVerReleaseType
 import com.typesafe.tools.mima.core.{Problem, ProblemFilter}
-import sbt.File
+import com.typesafe.tools.mima.plugin.SbtMima
+import sbt.{File, Keys}
+import sbt.util.Logger
 
-class MimaChecker(miMaExecutor: MiMaExecutor, filters: Seq[ProblemFilter]) {
+class MimaChecker(
+  classpath: Keys.Classpath,
+  scalaVersion: String,
+  filters: Seq[ProblemFilter],
+  logger: Logger
+) {
 
-  private def applyFilter(problem: Problem): Boolean = {
-    filters.forall(filter => filter.apply(problem))
-  }
+  private def applyFilter(problem: Problem): Boolean = filters.forall(_(problem))
 
   def compare(prev: File, curr: File): MiMaResult = {
     require(prev != curr, s"prev=$prev cannot equal curr=$curr")
+    val (problemsBackwards, problemsForwards) = SbtMima.runMima(prev, curr, classpath, "both", scalaVersion, logger)
 
-    val problemsBackwards = miMaExecutor.backwardProblems(prev, curr).filter(applyFilter)
-    val problemsForwards = miMaExecutor.forwardProblems(prev, curr).filter(applyFilter)
+    val filteredProblemsBackwards = problemsBackwards.filter(applyFilter)
+    val filteredProblemsForwards = problemsForwards.filter(applyFilter)
 
-    val backwards = problemsBackwards.map(problem => MiMaProblem(Direction.Backward, problem.description("current")))
-    val forwards = problemsForwards.map(problem => MiMaProblem(Direction.Forward, problem.description("previous")))
+    val backwards = filteredProblemsBackwards.map(problem => MiMaProblem(Direction.Backward, problem.description("current")))
+    val forwards = filteredProblemsForwards.map(problem => MiMaProblem(Direction.Forward, problem.description("previous")))
 
     MiMaResult(backwards, forwards)
   }

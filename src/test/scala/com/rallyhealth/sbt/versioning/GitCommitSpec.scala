@@ -2,9 +2,10 @@ package com.rallyhealth.sbt.versioning
 
 import com.rallyhealth.sbt.versioning.GitCommit._
 import com.rallyhealth.sbt.versioning.HashSemVerIdentifierSpec._
-import org.scalatest.FunSpec
+import org.scalactic.TripleEqualsSupport
+import org.scalatest.funspec.AnyFunSpec
 
-class GitCommitSpec extends FunSpec {
+class GitCommitSpec extends AnyFunSpec with TripleEqualsSupport {
 
   describe("fromGitLog") {
 

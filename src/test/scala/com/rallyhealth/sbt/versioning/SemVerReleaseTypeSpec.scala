@@ -1,10 +1,11 @@
 package com.rallyhealth.sbt.versioning
 
 import org.scalactic.TypeCheckedTripleEquals
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 class SemVerReleaseTypeSpec
-  extends WordSpec
+  extends AnyWordSpec
   with Matchers
   with TypeCheckedTripleEquals {
 

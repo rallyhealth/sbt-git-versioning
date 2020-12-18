@@ -1,9 +1,10 @@
 package com.rallyhealth.sbt.versioning
 
 import com.rallyhealth.sbt.versioning.StringSemVerIdentifier.string2StringIdentifier
-import org.scalatest.FunSpec
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.funspec.AnyFunSpec
 
-class SemVerIdentifierListSpec extends FunSpec {
+class SemVerIdentifierListSpec extends AnyFunSpec with TypeCheckedTripleEquals {
 
   describe("even lists") {
 

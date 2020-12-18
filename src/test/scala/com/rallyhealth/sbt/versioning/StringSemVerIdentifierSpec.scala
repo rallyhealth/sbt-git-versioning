@@ -1,8 +1,9 @@
 package com.rallyhealth.sbt.versioning
 
-import org.scalatest.FunSpec
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.funspec.AnyFunSpec
 
-class StringSemVerIdentifierSpec extends FunSpec {
+class StringSemVerIdentifierSpec extends AnyFunSpec with TypeCheckedTripleEquals {
 
   // http://semver.org/#spec-item-9
   it("from SemVer docs #9") {

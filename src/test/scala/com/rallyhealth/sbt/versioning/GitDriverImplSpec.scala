@@ -1,14 +1,14 @@
 package com.rallyhealth.sbt.versioning
 
 import java.io.File
-
 import com.rallyhealth.sbt.versioning.GitDriverImplSpec.MockDriver
-import org.scalatest.FunSpec
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.sys.process._
 import scala.util.Random
 
-class GitDriverImplSpec extends FunSpec {
+class GitDriverImplSpec extends AnyFunSpec with TypeCheckedTripleEquals {
 
   private val workingDir = new File("doesNotExist.delete").getAbsoluteFile.getParentFile
 

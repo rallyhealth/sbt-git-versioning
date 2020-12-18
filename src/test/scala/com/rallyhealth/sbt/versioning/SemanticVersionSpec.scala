@@ -1,11 +1,11 @@
 package com.rallyhealth.sbt.versioning
 
 import com.rallyhealth.sbt.versioning.SemanticVersion._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.util.Random
 
-class SemanticVersionSpec extends FunSpec {
+class SemanticVersionSpec extends AnyFunSpec {
 
   describe("ReleaseVersion") {
 

@@ -1,10 +1,11 @@
 package com.rallyhealth.sbt.versioning
 
-import org.scalatest.FunSpec
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.util.Random
 
-class HashSemVerIdentifierSpec extends FunSpec {
+class HashSemVerIdentifierSpec extends AnyFunSpec with TypeCheckedTripleEquals {
 
   describe("constructor") {
 
