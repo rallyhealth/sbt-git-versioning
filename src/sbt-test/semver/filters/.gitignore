@@ -3,6 +3,7 @@
 *.log
 
 # sbt specific
+.bsp/
 .cache
 .history
 .lib/
