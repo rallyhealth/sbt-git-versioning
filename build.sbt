@@ -1,13 +1,10 @@
 import sbt.plugins.SbtPlugin
 
 name := "sbt-git-versioning"
-organizationName := "Rally Health"
-organization := "com.rallyhealth.sbt"
+ThisBuild / organizationName := "Rally Health"
+ThisBuild / organization := "com.rallyhealth.sbt"
 
-licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
-
-bintrayOrganization := Some("rallyhealth")
-bintrayRepository := "sbt-plugins"
+ThisBuild / licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
 
 // SbtPlugin requires sbt 1.2.0+
 // See: https://developer.lightbend.com/blog/2018-07-02-sbt-1-2-0/#sbtplugin-for-plugin-development

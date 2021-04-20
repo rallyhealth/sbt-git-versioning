@@ -4,5 +4,12 @@ scala:
   - 2.12.6
 jdk:
   - openjdk8
+
+before_script:
+  # Download sbt because Travis can't find it automatically :(
+  - mkdir -p $HOME/.sbt/launchers/1.2.8/
+  - curl -L -o $HOME/.sbt/launchers/1.2.8/sbt-launch.jar https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.2.8/sbt-launch-1.2.8.jar
+
 script:
   - sbt ^test ^scripted
+
