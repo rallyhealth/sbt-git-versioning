@@ -28,9 +28,7 @@ scalacOptions ++= {
 // https://github.com/lightbend/mima#usage
 crossSbtVersions := List("0.13.18", "1.2.8")
 
-publishMavenStyle := false
-
-resolvers += Resolver.bintrayRepo("typesafe", "sbt-plugins")
+publishMavenStyle := true
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % Test,
