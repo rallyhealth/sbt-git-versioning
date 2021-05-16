@@ -399,6 +399,36 @@ class GitDriverImplSpec extends FunSpec {
       }
     }
   }
+
+  describe("branchState") {
+    val tempDir = new File(System.getProperty("java.io.tmpdir"))
+    val fakeGitRepo = "testing_temp_git_repo_" + Random.nextInt(1000000000)
+    Process(s"""git init $fakeGitRepo""".trim, tempDir).!!
+    val newWorkingDir = new File(System.getProperty("java.io.tmpdir"), fakeGitRepo)
+    val fileName = "testing_only_should_be_deleted"
+    val tempFile = new File(newWorkingDir, fileName)
+    assert(tempFile.createNewFile())
+    Process(s"""git add $fileName""".trim, newWorkingDir).!!
+    Process(s"""git commit -m 'Empty'""".trim, newWorkingDir).!!
+
+    val driver = new GitDriverImpl(newWorkingDir)
+    
+    it("abbrevLength 4") {
+      val version = driver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 4)
+      assert(version.toString.length == "0.0.1-1-abcd-SNAPSHOT".length)
+    }
+
+    it("abbrevLength 7") {
+      val version = driver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
+      assert(version.toString.length == "0.0.1-1-abcdefg-SNAPSHOT".length)
+    }
+
+    it("abbrevLength 40") {
+      val version = driver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 40)
+      assert(version.toString.length == "0.0.1-1-abcdefghijklmnopqrstuvxyz123456789123456-SNAPSHOT".length)
+    }    
+
+  }
 }
 
 object GitDriverImplSpec {
