@@ -107,6 +107,10 @@ object GitVersioningPlugin extends AutoPlugin {
     )
 
     lazy val writeVersion: InputKey[Unit] = inputKey[Unit]("""Writes the version to a file."""")
+    
+    lazy val abbrevLength: SettingKey[Int] = settingKey[Int](
+      "Sets the length used for the abbreviated commit hash in non-release commits."
+    )
   }
 
   import autoImport._
@@ -159,7 +163,7 @@ object GitVersioningPlugin extends AutoPlugin {
     versionFromGit := {
       // This depends on but does not use [[autoFetchResult]]; that ensures the task is run but ignores the result.
       (autoFetchResult in ThisProject).value
-      val gitVersion = gitDriver.value.calcCurrentVersion(ignoreDirty.value)
+      val gitVersion = gitDriver.value.calcCurrentVersion(ignoreDirty.value, abbrevLength.value)
 
       ConsoleLogger().info(s"GitVersioningPlugin set versionFromGit=$gitVersion")
 
@@ -186,6 +190,8 @@ object GitVersioningPlugin extends AutoPlugin {
     gitVersioningSnapshotLowerBound := None,
 
     ignoreDirty := false,
+
+    abbrevLength := 7,
 
     version := semanticVersion.value.toString,
 
@@ -217,7 +223,7 @@ object GitVersioningPlugin extends AutoPlugin {
           .foldLeft(ver)(_.release(_))
 
         val applySnapshotLowerBound: VersionTransform = ver => gitVersioningSnapshotLowerBound.value
-          .foldLeft(ver)(_.lowerBound(_, gitDriver.value.branchState))
+          .foldLeft(ver)(_.lowerBound(_, gitDriver.value.branchState(abbrevLength.value)))
 
         val applyAllTransforms = applyMajorMinorPatchRelease andThen applySnapshotLowerBound
         applyAllTransforms(versionFromGit.value)

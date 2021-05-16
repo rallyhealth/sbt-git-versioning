@@ -12,8 +12,10 @@ import scala.sys.process._
   */
 trait GitDriver {
 
-  /** Used to find the previous version and to check whether the HEAD and version commit are the same   */
-  def branchState: GitBranchState
+  /** Used to find the previous version and to check whether the HEAD and version commit are the same   
+   * @param abbrevLength The length used in the abbreviated hash for commits.
+   */
+  def branchState(abbrevLength: Int): GitBranchState
 
   /** Used to determine whether the current version is dirty or not. */
   def workingState: GitWorkingState
@@ -33,10 +35,11 @@ trait GitDriver {
     *
     * @param ignoreDirty Forces clean builds, i.e. when true this will not add '-dirty' to the version (nor
     * force creating a [[SnapshotVersion]] from a [[ReleaseVersion]]).
+    * @param abbrevLength The length used in the abbreviated hash for commits.
     */
-  def calcCurrentVersion(ignoreDirty: Boolean): SemanticVersion = {
+  def calcCurrentVersion(ignoreDirty: Boolean, abbrevLength: Int): SemanticVersion = {
 
-    val currVersion: SemanticVersion = branchState match {
+    val currVersion: SemanticVersion = branchState(abbrevLength) match {
 
       case GitBranchStateTwoReleases(_, headVersion, _, _) =>
         headVersion
@@ -122,13 +125,13 @@ class GitDriverImpl(dir: File) extends GitDriver {
     }
   }
 
-  override val branchState: GitBranchState = {
-    gitLog("--max-count=1").headOption match {
+  override def branchState(abbrevLength: Int): GitBranchState = {
+    gitLog("--max-count=1", abbrevLength).headOption match {
 
       case Some(headCommit) =>
 
         // we only care about the RELEASE commits so let's get them in order from reflog
-        val releaseRefs: Seq[(GitCommit, ReleaseVersion)] = gitForEachRef("").collect { case gc @ ReleaseVersion(rv) => (gc, rv) }
+        val releaseRefs: Seq[(GitCommit, ReleaseVersion)] = gitForEachRef("", abbrevLength).collect { case gc @ ReleaseVersion(rv) => (gc, rv) }
 
         // We only care about the current release and previous release so let's take the top two.
         // Then we want to find out what which git log commit is associated to the reflog sha.
@@ -137,7 +140,7 @@ class GitDriverImpl(dir: File) extends GitDriver {
         // That is why we have to run the command here to find the correct sha
         // Note: do not move git log into gitForEachRef as on long revisions it will take a LOT of time
         val releases: Seq[(GitCommit, ReleaseVersion)] = releaseRefs.take(2).map(tp =>
-          (gitLog(s"${tp._1.fullHash} --max-count=1").head, tp._2)
+          (gitLog(s"${tp._1.fullHash} --max-count=1", abbrevLength).head, tp._2)
         )
 
         val maybeCurrRelease = releases.headOption
@@ -199,7 +202,7 @@ class GitDriverImpl(dir: File) extends GitDriver {
   /**
     * Returns an ordered list of versions that are merged into your branch.
     */
-  private def gitForEachRef(arguments: String): Seq[GitCommit] = {
+  private def gitForEachRef(arguments: String, abbrevLength: Int): Seq[GitCommit] = {
     require(isGitRepo(dir), "Must be in a git repository")
     require(isGitCompatible, "Must be git version 2.X.X or greater")
 
@@ -221,7 +224,7 @@ class GitDriverImpl(dir: File) extends GitDriver {
     exitCode match {
       // you get 128 when you run 'git log' on a repository with no commits
       case 0 | 128 =>
-        val abbreviatedHashLength = findAbbreviatedHashLength()
+        val abbreviatedHashLength = findAbbreviatedHashLength(abbrevLength)
         output map { line =>
           GitCommit.fromGitRef(line, abbreviatedHashLength)
         }
@@ -232,7 +235,7 @@ class GitDriverImpl(dir: File) extends GitDriver {
   /**
     * Executes a single "git log" command.
     */
-  private def gitLog(arguments: String): Seq[GitCommit] = {
+  private def gitLog(arguments: String, abbrevLength: Int): Seq[GitCommit] = {
     require(isGitRepo(dir), "Must be in a git repository")
     require(isGitCompatible, "Must be git version 2.X.X or greater")
 
@@ -258,7 +261,7 @@ class GitDriverImpl(dir: File) extends GitDriver {
     exitCode match {
       // you get 128 when you run 'git log' on a repository with no commits
       case 0 | 128 =>
-        val abbreviatedHashLength = findAbbreviatedHashLength()
+        val abbreviatedHashLength = findAbbreviatedHashLength(abbrevLength)
         output map { line =>
           GitCommit.fromGitLog(line, abbreviatedHashLength)
         }
@@ -283,13 +286,12 @@ class GitDriverImpl(dir: File) extends GitDriver {
     * and [[https://stackoverflow.com/questions/32405922/in-my-repo-how-long-must-the-longest-hash-prefix-be-to-prevent-any-overlap]]
     * for more information.
     */
-  private def findAbbreviatedHashLength(): Int = {
-    val (exitCode, output) = runCommand("git rev-parse --short HEAD", throwIfNonZero = false)
+  private def findAbbreviatedHashLength(abbrevLength: Int): Int = {
+    val (exitCode, output) = runCommand(s"git rev-parse --short=${abbrevLength} HEAD", throwIfNonZero = false)
     exitCode match {
       // you get 128 when you run 'git rev-parse' on a repository with no commits
       case 0 | 128 =>
-        // 7 is the default hash length, so let's use that if the commit length is shorter OR we have zero commits
-        math.max(output.mkString("").trim.length, 7)
+        math.max(output.mkString("").trim.length, abbrevLength)
       case ret =>
         throw new IllegalStateException(s"Non-zero exit code when running git rev-parse: $ret")
     }
