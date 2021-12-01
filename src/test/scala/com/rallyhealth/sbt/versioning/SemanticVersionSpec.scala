@@ -281,25 +281,25 @@ class SemanticVersionSpec extends FunSpec {
         }
 
         it("with identifier") {
-          val version = fromString("v1.2.3-rc1").get.asInstanceOf[ReleaseVersion]
+          val version = fromString("v1.2.3-rc1").get.asInstanceOf[PreReleaseVersion]
           assert(version.toString === "1.2.3-rc1")
           assert(version.major === 1, version)
           assert(version.minor === 2, version)
           assert(version.patch === 3, version)
           assert(!version.isDirty, version)
           assert(version.identifiers.values.map(_.toString) === Seq("rc1"))
-          assert(ReleaseVersion.regex.pattern.matcher(version.toString).matches, version.toString)
+          assert(PreReleaseVersion.regex.pattern.matcher(version.toString).matches, version.toString)
         }
 
         it("with multiple identifiers") {
-          val version = fromString("v1.2.3-rc1-beta").get.asInstanceOf[ReleaseVersion]
+          val version = fromString("v1.2.3-rc1-beta").get.asInstanceOf[PreReleaseVersion]
           assert(version.toString === "1.2.3-rc1-beta")
           assert(version.major === 1, version)
           assert(version.minor === 2, version)
           assert(version.patch === 3, version)
           assert(!version.isDirty, version)
           assert(version.identifiers.values.map(_.toString) === Seq("rc1", "beta"))
-          assert(ReleaseVersion.regex.pattern.matcher(version.toString).matches, version.toString)
+          assert(PreReleaseVersion.regex.pattern.matcher(version.toString).matches, version.toString)
         }
       }
 
@@ -328,25 +328,25 @@ class SemanticVersionSpec extends FunSpec {
         }
 
         it("with identifier") {
-          val version = fromString("v1.2.3-rc1-dirty-SNAPSHOT").get.asInstanceOf[ReleaseVersion]
+          val version = fromString("v1.2.3-rc1-dirty-SNAPSHOT").get.asInstanceOf[PreReleaseVersion]
           assert(version.toString === "1.2.3-rc1-dirty-SNAPSHOT")
           assert(version.major === 1, version)
           assert(version.minor === 2, version)
           assert(version.patch === 3, version)
           assert(version.isDirty, version)
           assert(version.identifiers.values.map(_.toString) === Seq("rc1", "dirty", "SNAPSHOT"))
-          assert(ReleaseVersion.regex.pattern.matcher(version.toString).matches, version.toString)
+          assert(PreReleaseVersion.regex.pattern.matcher(version.toString).matches, version.toString)
         }
 
         it("with multiple identifiers") {
-          val version = fromString("v1.2.3-rc1-beta-dirty-SNAPSHOT").get.asInstanceOf[ReleaseVersion]
+          val version = fromString("v1.2.3-rc1-beta-dirty-SNAPSHOT").get.asInstanceOf[PreReleaseVersion]
           assert(version.toString === "1.2.3-rc1-beta-dirty-SNAPSHOT")
           assert(version.major === 1, version)
           assert(version.minor === 2, version)
           assert(version.patch === 3, version)
           assert(version.isDirty, version)
           assert(version.identifiers.values.map(_.toString) === Seq("rc1", "beta", "dirty", "SNAPSHOT"))
-          assert(ReleaseVersion.regex.pattern.matcher(version.toString).matches, version.toString)
+          assert(PreReleaseVersion.regex.pattern.matcher(version.toString).matches, version.toString)
         }
       }
     }
@@ -678,7 +678,9 @@ class SemanticVersionSpec extends FunSpec {
           "1.0.0-rc.1",
           "1.0.0")
 
-        val origOrder = fromDocs.flatMap(str => ReleaseVersion.unapply(str))
+        val origOrder: Seq[SemanticVersion] = fromDocs.flatMap(str =>
+          PreReleaseVersion.unapply(str) orElse ReleaseVersion.unapply(str)
+        )
 
         assert(fromDocs.size === origOrder.size)
 

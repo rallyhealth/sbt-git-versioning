@@ -42,7 +42,12 @@ trait GitDriver {
         headVersion
 
       case GitBranchStateOneReleaseNotHead(head, _, version) =>
-        SnapshotVersion.createAfterRelease(version, head)
+        SemanticVersion.fromString(head.commit.tags.mkString) match {
+          case Some(preReleaseVersion) =>
+            preReleaseVersion
+          case _ =>
+            SnapshotVersion.createAfterRelease(version.toRelease, head)
+        }
 
       case GitBranchStateOneReleaseHead(_, version) =>
         version

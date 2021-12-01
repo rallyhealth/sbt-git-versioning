@@ -132,13 +132,83 @@ object SemanticVersion {
         val commitNum = CommitsSemVerIdentifier(commits.toInt)
         Some(SnapshotVersion(ma, mi, pa, extraIds, isDirtyVal(isDirty), HashSemVerIdentifier.safeMake(hash), commitNum))
 
-      case ReleaseVersion.regex(VersionExtractor(ma, mi, pa), IdentifierExtractor(extraIds), isDirty) =>
+      case PreReleaseVersion.regex(VersionExtractor(ma, mi, pa), IdentifierExtractor(extraIds), isDirty) if extraIds.nonEmpty =>
+        Some(PreReleaseVersion(ma, mi, pa, extraIds, isDirtyVal(isDirty)))
+
+      case ReleaseVersion.regex(VersionExtractor(ma, mi, pa), IdentifierExtractor(extraIds), isDirty) if extraIds.isEmpty =>
         Some(ReleaseVersion(ma, mi, pa, extraIds, isDirtyVal(isDirty)))
 
       case _ =>
         None
     }
   }
+}
+
+case class PreReleaseVersion(major: Int, minor: Int, patch: Int, versionIdentifiers: SemVerIdentifierList = SemVerIdentifierList.empty, isDirty: Boolean = false)
+  extends SemanticVersion {
+
+  override val identifiers: SemVerIdentifierList = {
+    SemVerIdentifierList.empty ++
+      versionIdentifiers ++
+      (if (isDirty) Seq(StringSemVerIdentifier.dirty, StringSemVerIdentifier.snapshot) else Seq.empty)
+  }
+
+  override def setDirty(value: Boolean): SemanticVersion =
+    if (isDirty == value) this else copy(isDirty = value)
+
+  override def compare(that: SemanticVersion): Int = that match {
+    case thatSnapshot: SnapshotVersion =>
+      val superDelta = super.compare(thatSnapshot.toRelease)
+      // snapshots for this release are considered LESS than the release, see http://semver.org/#spec-item-11
+      if (superDelta == 0)
+        1
+      else
+        superDelta
+
+    case thatRelease: ReleaseVersion =>
+      super.compare(thatRelease)
+
+    case thatPreRelease: PreReleaseVersion =>
+      val superDelta = super.compare(thatPreRelease.toRelease)
+      if (superDelta == 0) 1 else superDelta
+  }
+
+  override def toRelease: ReleaseVersion = ReleaseVersion(major, minor, patch, versionIdentifiers, isDirty)
+
+  override def isRelease: Boolean = true
+}
+
+object PreReleaseVersion {
+  val regex: Regex = {
+    import SemanticVersion._
+    (versionPrefix + s"(?:-(${StringSemVerIdentifier.dirty})-${StringSemVerIdentifier.snapshot})?").r
+  }
+
+  val initialVersion = PreReleaseVersion(0, 0, 1, SemVerIdentifierList.empty, isDirty = false)
+
+  def unapply(commit: GitCommit): Option[PreReleaseVersion] = fromCommit(commit)
+
+  def unapply(string: String): Option[PreReleaseVersion] =
+    SemanticVersion.fromString(string).collect { case v: PreReleaseVersion => v }
+
+  def parseAsCleanOrThrow(value: String): PreReleaseVersion = {
+    unapply(value)
+      .filter(!_.isDirty)
+      .getOrElse(
+        throw new IllegalArgumentException(s"[SemVer] Config problem: cannot parse value=$value as clean release version"))
+  }
+
+  def fromCommit(commit: GitCommit): Option[PreReleaseVersion] = {
+    val preReleases =
+      commit.tags.flatMap(SemanticVersion.fromString)
+        .collect { case x: PreReleaseVersion if !x.isDirty => x }
+
+    preReleases.sorted[SemanticVersion].lastOption
+  }
+
+  import scala.language.implicitConversions
+
+  implicit def fromStringToMaybePreReleaseVersion(s: String): Option[PreReleaseVersion] = unapply(s)
 }
 
 /**
@@ -171,6 +241,8 @@ case class ReleaseVersion(
     case thatRelease: ReleaseVersion =>
       super.compare(thatRelease)
 
+    case thatPreRelease: PreReleaseVersion =>
+      super.compare(thatPreRelease)
   }
 
   override def toRelease: ReleaseVersion = this
@@ -285,6 +357,11 @@ case class SnapshotVersion(
         -1
       else
         majorMinorPatchDelta
+
+    case thatPreRelease: PreReleaseVersion =>
+      val majorMinorPatchDelta = toRelease.copy(isDirty = false).compare(thatPreRelease.copy(isDirty = false))
+      // Snapshots are considered less than the PreRelease, see above
+      if (majorMinorPatchDelta == 0) -1 else majorMinorPatchDelta
   }
 
   /**
