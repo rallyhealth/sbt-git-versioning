@@ -25,13 +25,13 @@ In either case, you should now be able to add the plugin dependency to `project/
 ```scala
   addSbtPlugin("com.rallyhealth.sbt" % "sbt-git-versioning" % "x.y.z")
 ```
-3. Enable the SemVer plugin to enforce SemVer with MiMa. (Important for shared libraries, not so much for personal apps)
+3. Enable the SemVer plugin to enforce semantic versioning with [MiMa](https://github.com/lightbend/mima) (important for shared libraries, not so much for personal apps):
 
 ```scala
 val example = project
   .enablePlugins(SemVerPlugin)
 ```
-4. Add a `gitVersioningSnapshotLowerBound` placeholder in build.sbt.
+4. Add a `gitVersioningSnapshotLowerBound` placeholder in your `build.sbt`:
 ```sbt
 // Uncomment when you're ready to start building 1.0.0-...-SNAPSHOT versions.
 // gitVersioningSnapshotLowerBound in ThisBuild := "1.0.0"
@@ -41,7 +41,7 @@ val example = project
 
 [GitVersioningPlugin](blob/master/src/main/scala/com/rallyhealth/versioning/GitVersioningPlugin.scala)
 focuses on automatically determining the value of the `version` setting. The `version` is determined by looking at git history (for
-previous tags) and the state of the working directly. Read on for the exact details.
+previous tags) and the state of the working directory. Read on for the exact details.
 
 ## Usage
 
@@ -85,7 +85,7 @@ The version is generally derived from git, though there are a couple ways to cha
 
 ### Version Override
 
-The version.override arg sets the version and overrides all other sources.
+The `version.override` arg sets the version and overrides all other sources.
 
 ```
 sbt -Dversion.override=1.2.3 ...
@@ -154,7 +154,7 @@ ensure that any git plugins are configured to not use shallow clones.
 
 ### Recommended: -Drelease
 
-Creating a release is done by passing a [release arg](#release-arg-property).
+Creating a release is done by passing a [release arg](#release-arg-property):
 ```
 sbt -Drelease=patch publish[Local]
 ```
@@ -181,7 +181,7 @@ sbt publish[Local]
 ### Not recommended (unless have good reasons): version.override
 
 ...or by overriding the version that will be applied to a specific build, using the
-`version.override` setting. Typically this is done by at the command line to avoid changing `build.sbt`.
+`version.override` setting. Typically this is done at the command line to avoid changing `build.sbt`.
 ```
 sbt -Dversion.override=1.2.3 publish[Local]
 ```
@@ -190,8 +190,8 @@ You shouldn't do this without good reason. Version determination can be complica
 
 ## Extra Identifiers
 
-To add an extra identifier like "-alpha" or "-rc1" or "-rally" it must be included it in the version directly
-by overriding the "version" setting directly. (There was a feature to add those separately but it has been
+To add an extra identifier like "-alpha" or "-rc1" or "-rally", you must include it in the version directly
+by overriding the "version" setting. (There was a feature to add those separately but it has been
 removed because it was never used. Feel free to re-add it.)
 
 # SemVerPlugin
@@ -203,14 +203,14 @@ patch/minor/major changes if you want to release a patch/minor/major.
 
 ## Usage
 
-You can run the check manually using `semVerCheck`. The check and also be run automatically:
+You can run the check manually using `semVerCheck`. The check can also be run automatically:
 
 * *Compile* - If `semVerCheckOnCompile` is set to true (the default) it will check after you compile
 * *Test* - If `semVerCheckOnTest` is set to true (the default) it will check after you test
 * *Publish* - If `semVerCheckOnPublish` is set to true (the default) it will check **before** you publish
 * *PublishLocal* - If `semVerCheckOnPublish` is set to true (the default) it will check **before** you publishLocal
 
-When the SemVerPlugin halts the build it will look like:
+When the SemVerPlugin halts the build it will look like this:
 ```
 [error] (api/*:semVerCheck) com.rallyhealth.sbt.semver.SemVerVersionTooLowException: Your changes have new functionality and binary incompatibilites which violates the http://semver.org rules for a Minor release.
 [error]
@@ -226,7 +226,7 @@ When the SemVerPlugin halts the build it will look like:
 ## Information
 
 SemverPlugin is built on top of [Typesafe's migration-manager tool](https://github.com/typesafehub/migration-manager).
-First it finds the previous version by looking at git history to find a previous tag (like GitVersioningPlugin).
+First it finds the previous version by looking at the git history to find a previous tag (like GitVersioningPlugin).
 Then it uses that artifact as the baseline and compares against your changes.
 
 ## Notes
