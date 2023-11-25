@@ -104,7 +104,7 @@ case class HashSemVerIdentifier(hash: String) extends SemVerIdentifier {
 
 object HashSemVerIdentifier {
 
-  val regex: Regex = "g?[0-9a-f]{7,}".r
+  val regex: Regex = "g?[0-9a-f]+".r
 
   /**
     * If necessary removes the pre-pended 'g' to match [[GitVersioningPlugin]] format.

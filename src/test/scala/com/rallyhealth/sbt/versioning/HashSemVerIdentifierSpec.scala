@@ -38,16 +38,6 @@ class HashSemVerIdentifierSpec extends FunSpec {
 
   describe("hash length") {
 
-    it("less than 7") {
-      val random = new Random
-      (0 until 7).foreach { len =>
-        val hash = Iterator.continually(random.nextInt(10)).take(len).map(_.toString).mkString("")
-        intercept[IllegalArgumentException] {
-          HashSemVerIdentifier(hash)
-        }
-      }
-    }
-
     it("more than 40") {
       val random = new Random
       (41 until 50).foreach { len =>

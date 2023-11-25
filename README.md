@@ -103,6 +103,10 @@ This is useful for preparing major releases with breaking changes (esp. when com
 | 1.0.0-n-0123abc-SNAPSHOT |                                   | 1.0.0-n-0123abc-SNAPSHOT |
 | 1.0.0                    | 2.0.0                             | 2.0.0-n-0123abc-SNAPSHOT |
 
+### abbrevLength
+
+The `abbrevLength` settingKey can be used to manually force a certain length used for the hash in the version description. This is normally set by Git, which sets a minimum length based on the number of commits in your repository (with a minimum of 7). Setting this number manually can be useful if your CI server is working with shallow repositories (which is not recommended - see "Notes") or you want to ensure a consistent length of snapshot versions as your repository grows. This parameter matches the behavior of the `--abbrev` parameter of `git describe`.
+
 ### Release arg Property
 
 The release arg bumps the version up by a major, minor, or patch increment.
@@ -146,9 +150,9 @@ since the creation of the repository.
 * This plugin is intentionally different than something like [sbt-release](https://github.com/sbt/sbt-release) which stores
 the version in a `version.sbt` file. Those types of plugins require more manual effort on the part of the developer.
 
-*Warning:* Git Versioning may misbehave with shallow clones. If the incorrect version is being returned and tags are
+*Warning:* Git Versioning may misbehave with shallow clones, as it cannot be guaranteed that a shallow clone includes all tags and commits necessary to determine the version in a consistent If the incorrect version is being returned and tags are
 accessible, you may be using a shallow clone, in which case `git fetch --unshallow` will fix the issue. On CI systems,
-ensure that any git plugins are configured to not use shallow clones.
+ensure that any git plugins are configured to not use shallow clones. If you are unable to use deep clones, you can set the `abbrevLength` parameter in order to ensure snapshot versions are consistently named.
 
 ## Creating a Release
 

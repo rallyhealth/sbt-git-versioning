@@ -16,7 +16,7 @@ object SemVerTasks {
     val typePrefix = s"$SemVerPrefix Check type:"
     val abortPrefix = s"$SemVerPrefix Check aborted:"
 
-    git.branchState match {
+    git.branchState(7) match {
       case GitBranchStateTwoReleases(_, headVersion, _, prevVersion) =>
         if (git.workingState.isDirty) {
           logger.debug(s"$typePrefix comparing most recent release with post-tag changes")

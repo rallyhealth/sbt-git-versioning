@@ -31,7 +31,7 @@ class GitDriverImplSpec extends FunSpec {
     it("branchState") {
       // did it do something? I don't care what it did really, as long as it didn't throw
       val driver = new GitDriverImpl(workingDir)
-      val branchState = driver.branchState
+      val branchState = driver.branchState(7)
       // I need to do something or the compiler could eliminate the call
       assert(branchState === branchState)
     }
@@ -120,7 +120,7 @@ class GitDriverImplSpec extends FunSpec {
           val branchState = GitBranchStateNoCommits
           val workingState = GitWorkingState(isDirty = true)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "0.0.1-dirty-SNAPSHOT") // check against the README.md
           assert(result === ReleaseVersion.initialVersion.copy(isDirty = true))
         }
@@ -129,7 +129,7 @@ class GitDriverImplSpec extends FunSpec {
           val branchState = GitBranchStateNoCommits
           val workingState = GitWorkingState(isDirty = false)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "0.0.1") // check against the README.md
           assert(result === ReleaseVersion.initialVersion)
         }
@@ -147,7 +147,7 @@ class GitDriverImplSpec extends FunSpec {
           val branchState = GitBranchStateNoReleases(GitCommitWithCount(GitCommit(gitHash, 7, Seq.empty), 1))
           val workingState = GitWorkingState(isDirty = true)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "0.0.1-1-0123abc-dirty-SNAPSHOT") // check against the README.md
           assert(result === SnapshotVersion(0, 0, 1, SemVerIdentifierList.empty, isDirty = true, gitHash.take(7), 1))
         }
@@ -156,7 +156,7 @@ class GitDriverImplSpec extends FunSpec {
           val branchState = GitBranchStateNoReleases(GitCommitWithCount(GitCommit(gitHash, 7, Seq.empty), 1))
           val workingState = GitWorkingState(isDirty = false)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "0.0.1-1-0123abc-SNAPSHOT") // check against the README.md
           assert(result === SnapshotVersion(0, 0, 1, SemVerIdentifierList.empty, isDirty = false, gitHash.take(7), 1))
         }
@@ -183,7 +183,7 @@ class GitDriverImplSpec extends FunSpec {
           val branchState = GitBranchStateOneReleaseHead(GitCommit(gitHash, 7, Seq("1.1.0")), prevRelease)
           val workingState = GitWorkingState(isDirty = false)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "1.1.0") // check against the README.md
           assert(result === prevRelease)
         }
@@ -243,7 +243,7 @@ class GitDriverImplSpec extends FunSpec {
             prevRelease)
           val workingState = GitWorkingState(isDirty = true)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "1.0.4-1-0123abc-dirty-SNAPSHOT") // check against the README.md
           assert(result === SnapshotVersion(1, 0, 4, SemVerIdentifierList.empty, isDirty = true, gitHash.take(7), 1))
         }
@@ -256,7 +256,7 @@ class GitDriverImplSpec extends FunSpec {
             prevRelease)
           val workingState = GitWorkingState(isDirty = false)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "1.0.4-1-0123abc-SNAPSHOT") // check against the README.md
           assert(result === SnapshotVersion(1, 0, 4, SemVerIdentifierList.empty, isDirty = false, gitHash.take(7), 1))
         }
@@ -331,7 +331,7 @@ class GitDriverImplSpec extends FunSpec {
           val branchState = GitBranchStateTwoReleases(headCommit, prevCommit)
           val workingState = GitWorkingState(isDirty = true)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "1.1.0-dirty-SNAPSHOT") // check against the README.md
           assert(result === ReleaseVersion(1, 1, 0, SemVerIdentifierList.empty, isDirty = true))
         }
@@ -342,7 +342,7 @@ class GitDriverImplSpec extends FunSpec {
           val branchState = GitBranchStateTwoReleases(headCommit, prevCommit)
           val workingState = GitWorkingState(isDirty = false)
           val gitDriver = MockDriver(branchState, workingState)
-          val result = gitDriver.calcCurrentVersion(ignoreDirty = false)
+          val result = gitDriver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
           assert(result.toString === "1.1.0") // check against the README.md
           assert(result === ReleaseVersion(1, 1, 0, SemVerIdentifierList.empty, isDirty = false))
         }
@@ -355,7 +355,7 @@ class GitDriverImplSpec extends FunSpec {
         val branchState = GitBranchStateNoCommits
         val workingState = GitWorkingState(isDirty = true)
         val gitDriver = MockDriver(branchState, workingState)
-        val result = gitDriver.calcCurrentVersion(ignoreDirty = true)
+        val result = gitDriver.calcCurrentVersion(ignoreDirty = true, abbrevLength = 7)
         assert(result.toString === "0.0.1")
         assert(result === ReleaseVersion.initialVersion)
       }
@@ -364,7 +364,7 @@ class GitDriverImplSpec extends FunSpec {
         val branchState = GitBranchStateNoReleases(GitCommitWithCount(GitCommit(gitHash, 7, Seq.empty), 1))
         val workingState = GitWorkingState(isDirty = true)
         val gitDriver = MockDriver(branchState, workingState)
-        val result = gitDriver.calcCurrentVersion(ignoreDirty = true)
+        val result = gitDriver.calcCurrentVersion(ignoreDirty = true, abbrevLength = 7)
         assert(result.toString === "0.0.1-1-0123abc-SNAPSHOT")
         assert(result === SnapshotVersion(0, 0, 1, SemVerIdentifierList.empty, isDirty = false, gitHash.take(7), 1))
       }
@@ -373,7 +373,7 @@ class GitDriverImplSpec extends FunSpec {
         val branchState = GitBranchStateOneReleaseHead(GitCommit(gitHash, 7, Seq("1.0.0")))
         val workingState = GitWorkingState(isDirty = true)
         val gitDriver = MockDriver(branchState, workingState)
-        val result = gitDriver.calcCurrentVersion(ignoreDirty = true)
+        val result = gitDriver.calcCurrentVersion(ignoreDirty = true, abbrevLength = 7)
         assert(result.toString === "1.0.0")
         assert(result === ReleaseVersion(1, 0, 0, SemVerIdentifierList.empty, isDirty = false))
       }
@@ -383,7 +383,7 @@ class GitDriverImplSpec extends FunSpec {
           GitCommitWithCount(GitCommit(gitHash, 7, Seq.empty), 1), GitCommit(gitHashAlt, 7, Seq("1.0.0")))
         val workingState = GitWorkingState(isDirty = true)
         val gitDriver = MockDriver(branchState, workingState)
-        val result = gitDriver.calcCurrentVersion(ignoreDirty = true)
+        val result = gitDriver.calcCurrentVersion(ignoreDirty = true, abbrevLength = 7)
         assert(result.toString === "1.0.1-1-0123abc-SNAPSHOT")
         assert(result === SnapshotVersion(1, 0, 1, SemVerIdentifierList.empty, isDirty = false, gitHash.take(7), 1))
       }
@@ -393,17 +393,49 @@ class GitDriverImplSpec extends FunSpec {
           GitCommit(gitHash, 7, Seq("2.0.0")), GitCommit(gitHashAlt, 7, Seq("1.0.0")))
         val workingState = GitWorkingState(isDirty = true)
         val gitDriver = MockDriver(branchState, workingState)
-        val result = gitDriver.calcCurrentVersion(ignoreDirty = true)
+        val result = gitDriver.calcCurrentVersion(ignoreDirty = true, abbrevLength = 7)
         assert(result.toString === "2.0.0")
         assert(result === ReleaseVersion(2, 0, 0, SemVerIdentifierList.empty, isDirty = false))
       }
     }
   }
+
+  describe("branchState") {
+    val tempDir = new File(System.getProperty("java.io.tmpdir"))
+    val fakeGitRepo = "testing_temp_git_repo_" + Random.nextInt(1000000000)
+    Process(s"""git init $fakeGitRepo""".trim, tempDir).!!
+    val newWorkingDir = new File(System.getProperty("java.io.tmpdir"), fakeGitRepo)
+    val fileName = "testing_only_should_be_deleted"
+    val tempFile = new File(newWorkingDir, fileName)
+    assert(tempFile.createNewFile())
+    Process(s"""git add $fileName""".trim, newWorkingDir).!!
+    Process(s"""git commit -m 'Empty'""".trim, newWorkingDir).!!
+
+    val driver = new GitDriverImpl(newWorkingDir)
+    
+    it("abbrevLength 4") {
+      val version = driver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 4)
+      assert(version.toString.length == "0.0.1-1-abcd-SNAPSHOT".length)
+    }
+
+    it("abbrevLength 7") {
+      val version = driver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 7)
+      assert(version.toString.length == "0.0.1-1-abcdefg-SNAPSHOT".length)
+    }
+
+    it("abbrevLength 40") {
+      val version = driver.calcCurrentVersion(ignoreDirty = false, abbrevLength = 40)
+      assert(version.toString.length == "0.0.1-1-abcdefghijklmnopqrstuvxyz123456789123456-SNAPSHOT".length)
+    }    
+
+  }
 }
 
 object GitDriverImplSpec {
 
-  case class MockDriver(branchState: GitBranchState, workingState: GitWorkingState) extends GitDriver {
+  case class MockDriver(branchStateMock: GitBranchState, workingState: GitWorkingState) extends GitDriver {
+
+    override def branchState(abbrevLength: Int) = branchStateMock
 
     override def getCommitCount(hash: Option[String]): Int = throw new UnsupportedOperationException
   }
