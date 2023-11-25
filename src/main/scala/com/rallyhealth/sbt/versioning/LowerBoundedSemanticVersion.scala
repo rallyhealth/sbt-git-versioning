@@ -33,6 +33,8 @@ object LowerBoundedSemanticVersion {
       )
 
       if (lowerBoundedVersion > version) {
+        if (version.isRelease && version.versionIdentifiers.values.exists(v => StringSemVerIdentifier.regex.pattern.matcher(v.toString).matches()))
+          return version
         require(version.isSnapshot, s"gitVersioningSnapshotLowerBound=$bound is higher than release=$version. Refusing to do a release build.")
         lowerBoundedVersion
       } else version

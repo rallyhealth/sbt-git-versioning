@@ -59,7 +59,7 @@ object SemVerReleaseType {
           // Snapshot versions are already incremented as a patch over the previous version
           originalVersion match {
             case rv: ReleaseVersion => v.copy(patch = v.patch + 1)
-            case sv: SnapshotVersion => v
+            case _                  => v
           }
       }
     }
